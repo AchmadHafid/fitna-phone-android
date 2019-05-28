@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Fitna Phone</string>
+    <string name="notification_channel_id" translatable="false">@string/app_name</string>
+    <string name="notification_channel_name" translatable="false">@string/app_name</string>
+    <string name="notification_channel_description">Notifikasi aplikasi</string>
+    <string name="blocker_notification_title">aplikasi diblok</string>
+    <string name="blocker_notification_title_multi">@string/blocker_notification_title</string>
+    <string name="blocker_notification_content">Restart HP kamu untuk mengatur ulang</string>
+    <string name="menu_lock">Kunci</string>
+    <string name="message_service_already_running">Aplikasi sudah aktif</string>
+    <string name="dialog_permission_required_title">Izin Diperlukan</string>
+    <string name="dialog_permission_required_message">Mohon berikan izin yg diperlukan pada halaman berikut terlebih dahulu</string>
+    <string name="tutorial_lock_title">Blok di sini</string>
+    <string name="tutorial_lock_description">Pilih aplikasi yg ingin kamu blok lalu klik di sini</string>
+
+</resources>

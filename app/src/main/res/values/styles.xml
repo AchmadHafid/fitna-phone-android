@@ -1,0 +1,15 @@
+<resources>
+
+    <!--region Activity Theme-->
+
+    <style name="AppTheme" parent="Theme.MaterialComponents.Light.NoActionBar" />
+
+    <!--endregion-->
+    <!--region View Theme-->
+
+    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.MaterialComponents.Dark.ActionBar" />
+    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.MaterialComponents.Light" />
+
+    <!--endregion-->
+
+</resources>

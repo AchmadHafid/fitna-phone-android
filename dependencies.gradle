@@ -1,0 +1,55 @@
+ext.libs = [
+        'Kotlin'             : [
+                "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version",
+                "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutine_version",
+                "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutine_version"
+        ],
+        'JetPack'            : [
+                "com.google.android.material:material:$google_material_version",
+                "androidx.core:core-ktx:$androidx_core_version",
+                "androidx.activity:activity-ktx:$androidx_activity_version",
+                "androidx.appcompat:appcompat:$androidx_appcompat_version",
+                "androidx.constraintlayout:constraintlayout:$androidx_constraintlayout_version",
+                "androidx.recyclerview:recyclerview:$androidx_recyclerview_version",
+                "androidx.lifecycle:lifecycle-extensions:$androidx_lifecycle_version",
+                "androidx.lifecycle:lifecycle-livedata-ktx:$androidx_lifecycle_version",
+                "androidx.lifecycle:lifecycle-viewmodel-ktx:$androidx_lifecycle_version",
+        ],
+        'Extra'              : [
+                "com.github.AchmadHafid:toolbar-badge-menu-item:$badge_menu_item_version",
+                "com.getkeepsafe.taptargetview:taptargetview:$tap_target_view_version",
+                "com.github.florent37:viewanimator:$view_animator_version",
+                "com.jonathanfinerty.once:once:$once_version"
+        ],
+        'LocalUnitTest'      : [
+                "org.robolectric:robolectric:$robolectric_version",
+                "androidx.test:core-ktx:$androidx_test_core_version",
+                "androidx.test:runner:$androidx_test_runner_version",
+                "androidx.test:rules:$androidx_test_rules_version",
+                "androidx.test.espresso:espresso-contrib:$androidx_test_espresso_version",
+                "androidx.test.espresso:espresso-intents:$androidx_test_espresso_version",
+                "androidx.test.espresso:espresso-accessibility:$androidx_test_espresso_version",
+                "androidx.test.espresso:espresso-remote:$androidx_test_espresso_version",
+                "androidx.test.espresso.idling:idling-concurrent:$androidx_test_espresso_version",
+                "androidx.test.espresso.idling:idling-net:$androidx_test_espresso_version",
+                "androidx.test.ext:junit-ktx:$androidx_test_ext_junit_version",
+                "androidx.test.ext:truth:$androidx_test_ext_truth_version",
+        ],
+        'InstrumentedTest'   : [
+                "androidx.test:core-ktx:$androidx_test_core_version",
+                "androidx.test:runner:$androidx_test_runner_version",
+                "androidx.test:rules:$androidx_test_rules_version",
+                "androidx.test.espresso:espresso-contrib:$androidx_test_espresso_version",
+                "androidx.test.espresso:espresso-intents:$androidx_test_espresso_version",
+                "androidx.test.espresso:espresso-accessibility:$androidx_test_espresso_version",
+                "androidx.test.espresso:espresso-remote:$androidx_test_espresso_version",
+                "androidx.test.espresso.idling:idling-concurrent:$androidx_test_espresso_version",
+                "androidx.test.espresso.idling:idling-net:$androidx_test_espresso_version",
+                "androidx.test.ext:junit-ktx:$androidx_test_ext_junit_version",
+                "androidx.test.ext:truth:$androidx_test_ext_truth_version",
+        ],
+        'AnnotationProcessor': [
+                "androidx.annotation:annotation:$androidx_annotation_version",
+                "androidx.lifecycle:lifecycle-compiler:$androidx_lifecycle_version",
+        ]
+]
