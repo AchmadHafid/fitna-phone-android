@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <color name="color_overlay_light">#f3e5f5</color>
-    <color name="color_overlay_dark">#7b1fa2</color>
+    <color name="colorStatusBar">@android:color/transparent</color>
+
+    <color name="color_selection_overlay">#f3e5f5</color>
+    <color name="color_selection_icon">#7b1fa2</color>
 
 </resources>

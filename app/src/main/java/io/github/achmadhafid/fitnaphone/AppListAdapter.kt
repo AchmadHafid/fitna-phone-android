@@ -15,20 +15,31 @@ import com.github.florent37.viewanimator.ViewAnimator
 
 class AppListAdapter(
     private val context: Context,
-    private val onBlockListener: (AppInfo) -> Unit
+    private val lastItems: MutableList<AppInfo> = mutableListOf(),
+    private val onClickListener: (AppInfo) -> Unit
 ) : RecyclerView.Adapter<AppListAdapter.ViewHolder>() {
 
-    private var items: List<AppInfo> = emptyList()
-    private val iconStore: HashMap<String, Drawable> = HashMap()
     private val animationDuration by longResC(context, R.integer.animation_duration)
-
-    fun setItems(appInfoList: List<AppInfo>) {
-        DiffUtil.calculateDiff(DiffUtilCallback(appInfoList, items))
-            .also {
-                items = appInfoList
+    private val iconStore: HashMap<String, Drawable> = HashMap()
+    var items: MutableList<AppInfo> = mutableListOf()
+        set(newItems) {
+            if (lastItems.isNotEmpty()) {
+                newItems.forEach { currentItem ->
+                    lastItems.forEach {lastItem ->
+                        if (currentItem.packageName == lastItem.packageName) {
+                            currentItem.blocked = lastItem.blocked
+                        }
+                    }
+                }
+                lastItems.clear()
             }
-            .dispatchUpdatesTo(this)
-    }
+            DiffUtil.calculateDiff(DiffUtilCallback(newItems, field))
+                .also {
+                    field.clear()
+                    newItems.forEach { field.add(it.copy()) }
+                }
+                .dispatchUpdatesTo(this)
+        }
 
     override fun getItemCount() = items.size
 
@@ -47,7 +58,7 @@ class AppListAdapter(
                 this,
                 getIconDrawable(packageName),
                 animationDuration,
-                onBlockListener
+                onClickListener
             )
         }
     }
@@ -61,16 +72,16 @@ class AppListAdapter(
 
     class ViewHolder(private val container: FrameLayout) : RecyclerView.ViewHolder(container) {
 
-        private val tvName: TextView     = container.findViewById(R.id.tvName)
-        private val ivIcon: ImageView    = container.findViewById(R.id.ivIcon)
-        private val ivLock: ImageView    = container.findViewById(R.id.ivLock)
+        private val tvName: TextView = container.findViewById(R.id.tvName)
+        private val ivIcon: ImageView = container.findViewById(R.id.ivIcon)
+        private val ivLock: ImageView = container.findViewById(R.id.ivLock)
         private val ivOverlay: ImageView = container.findViewById(R.id.ivOverlay)
 
         fun bindAppInfo(
             appInfo: AppInfo,
             iconDrawable: Drawable?,
             animationDuration: Long,
-            onBlockListener: (AppInfo) -> Unit
+            onClickListener: (AppInfo) -> Unit
         ) {
             tvName.text = appInfo.name
             iconDrawable?.let { ivIcon.setImageDrawable(it) }
@@ -78,7 +89,7 @@ class AppListAdapter(
             container.setOnClickListener {
                 appInfo.blocked = !appInfo.blocked
                 showLockIcon(appInfo.blocked, true, animationDuration)
-                onBlockListener(appInfo)
+                onClickListener(appInfo)
             }
         }
 
@@ -121,14 +132,15 @@ class DiffUtilCallback(
 ) : DiffUtil.Callback() {
 
     override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int) =
-        areContentsTheSame(oldItemPosition, newItemPosition)
+        newItems[newItemPosition].packageName == oldItems[oldItemPosition].packageName
 
     override fun getOldListSize() = oldItems.size
 
     override fun getNewListSize() = newItems.size
 
     override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int) =
-        newItems[newItemPosition] == oldItems[oldItemPosition]
+        newItems[newItemPosition].name == oldItems[oldItemPosition].name &&
+                newItems[newItemPosition].blocked == oldItems[oldItemPosition].blocked
 
 }
 

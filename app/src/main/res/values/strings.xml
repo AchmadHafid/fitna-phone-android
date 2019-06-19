@@ -16,5 +16,7 @@
     <string name="dialog_permission_required_message">Please grant required permission on the next screen to continue</string>
     <string name="tutorial_lock_title">Click to block</string>
     <string name="tutorial_lock_description">Select apps you want to block and then click here</string>
+    <string name="menu_switch_theme">Dark Theme</string>
+    <string name="menu_clear_selection">Clear</string>
 
 </resources>

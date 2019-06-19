@@ -14,5 +14,7 @@
     <string name="dialog_permission_required_message">Mohon berikan izin yg diperlukan pada halaman berikut terlebih dahulu</string>
     <string name="tutorial_lock_title">Blok di sini</string>
     <string name="tutorial_lock_description">Pilih aplikasi yg ingin kamu blok lalu klik di sini</string>
+    <string name="menu_switch_theme">Mode Gelap</string>
+    <string name="menu_clear_selection">Hapus</string>
 
 </resources>

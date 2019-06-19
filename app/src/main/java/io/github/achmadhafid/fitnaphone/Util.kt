@@ -1,4 +1,4 @@
-@file:Suppress("TooManyFunctions", "WildcardImport")
+@file:Suppress("TooManyFunctions", "WildcardImport", "MagicNumber")
 
 package io.github.achmadhafid.fitnaphone
 
@@ -13,19 +13,29 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
+import android.content.res.Configuration
 import android.graphics.drawable.Drawable
+import android.os.Build
 import android.os.PowerManager
+import android.preference.PreferenceManager
 import android.util.TypedValue
 import android.view.View
 import android.widget.Toast
 import androidx.annotation.*
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProviders
 
+//region Android Version
+
+fun isAtLeastL() = Build.VERSION.SDK_INT >= 21
+fun isAtLeastP() = Build.VERSION.SDK_INT >= 28
+
+//endregion
 //region System Service
 
 inline val Context.activityManager
@@ -137,6 +147,46 @@ fun Context.getAppIcon(packageName: String): Drawable? {
 }
 
 //endregion
+//region Theme Helper
+
+private const val SP_KEY = "theme"
+
+fun Context.loadTheme() {
+    applyTheme(
+        PreferenceManager.getDefaultSharedPreferences(this)
+            .getInt(SP_KEY, AppCompatDelegate.MODE_NIGHT_NO)
+    )
+}
+
+fun AppCompatActivity.saveTheme(theme: Int) {
+    PreferenceManager.getDefaultSharedPreferences(this)
+        .edit()
+        .putInt(SP_KEY, theme)
+        .apply()
+}
+
+fun AppCompatActivity.switchTheme() =
+    if (isDarkThemeEnable()) lightTheme()
+    else darkTheme()
+
+fun lightTheme() = applyTheme(AppCompatDelegate.MODE_NIGHT_NO)
+
+fun darkTheme() = applyTheme(AppCompatDelegate.MODE_NIGHT_YES)
+
+fun defaultTheme() {
+    applyTheme(when {
+        isAtLeastP() -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
+        isAtLeastL() -> AppCompatDelegate.MODE_NIGHT_AUTO_BATTERY
+        else -> AppCompatDelegate.MODE_NIGHT_NO
+    })
+}
+
+fun applyTheme(theme: Int): Int {
+    AppCompatDelegate.setDefaultNightMode(theme)
+    return theme
+}
+
+//endregion
 //region Miscellaneous
 
 fun Context.resolveColor(@ColorRes @AttrRes id: Int) = with(TypedValue()) {
@@ -205,6 +255,9 @@ fun Context.toastShort(message: String) =
     Toast.makeText(this, message, Toast.LENGTH_SHORT)
         .show()
 
+fun Context.toastShort(@StringRes messageRes: Int) =
+    toastShort(getString(messageRes))
+
 fun View.visibleOrInvisible(visible: Boolean) {
     visibility = if (visible) View.VISIBLE else View.INVISIBLE
 }
@@ -212,5 +265,8 @@ fun View.visibleOrInvisible(visible: Boolean) {
 fun <T> MutableLiveData<T>.notifyObserver() {
     value = value
 }
+
+fun AppCompatActivity.isDarkThemeEnable() = resources.configuration.uiMode and
+        Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES
 
 //endregion

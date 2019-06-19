@@ -8,10 +8,13 @@ class App : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        loadTheme()
         Once.initialise(this)
     }
 
 }
+
+//region Helper Function : Do thing only once
 
 fun doOnce(tag: String, block: () -> Unit) {
     if (!Once.beenDone(tag)) {
@@ -19,3 +22,5 @@ fun doOnce(tag: String, block: () -> Unit) {
         block()
     }
 }
+
+//endregion

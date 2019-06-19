@@ -38,6 +38,11 @@ class MainActivityViewModel : ViewModel() {
         _appList.notifyObserver()
     }
 
+    fun clearSelection() {
+        _appList.value?.forEach { it.blocked = false } ?: return
+        _appList.notifyObserver()
+    }
+
     private suspend fun loadAppList(context: Context) = withContext(Dispatchers.IO) {
         val lisOfApps = context.getInstalledAppsWithLaunchIntent()
             .filter { it.packageName != context.packageName }

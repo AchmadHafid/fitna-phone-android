@@ -3,10 +3,22 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:id="@+id/action_lock"
+        android:id="@+id/action_clear_selection"
         android:orderInCategory="100"
+        android:title="@string/menu_clear_selection"
+        android:icon="@drawable/ic_clear_black_24dp"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/action_lock"
+        android:orderInCategory="200"
         android:title="@string/menu_lock"
         app:actionLayout="@layout/toolbar_badge_menu_item"
-        app:showAsAction="always" />
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/action_switch_theme"
+        android:orderInCategory="300"
+        android:title="@string/menu_switch_theme"
+        android:icon="@drawable/ic_theme_light_dark_24dp_svg"
+        app:showAsAction="ifRoom"/>
 
 </menu>
