@@ -2,9 +2,10 @@ Fitna Phone
 -----------
 
 **Assalamu'alaikum my brothers & sisters in Islam**
-This android application is intended to supplement '10 Minutes Steadfast' application (check my other repo).
+
+This android application is intended to supplement ['10 Minutes Steadfast'](https://github.com/AchmadHafid/10-minutes-steadfast-android) application on my other repo.
 It can help us to fight against smart phone addiction in more fine-grained control.
-You can block only certain apps to be opened when you actually do nothing with it except killing (wasting) time.
+You can block certain apps to be opened when you actually do nothing with it except killing (wasting) time.
 
 ![image](https://lh3.googleusercontent.com/n6Wm8KZRGX_xJcZeKLHF1PT96LQPJVkqYdsqE1et8LsXT7l2_p_89efaHvKfXNS2UZrH=w720-h310-rw)
 ![image](https://lh3.googleusercontent.com/iKxMEMdVSmKRFE0R_XPfSGjjBGcqMACmCxp27A7bldXr2B1Knf6cZllk62bqumt5HN0=w720-h310-rw)
