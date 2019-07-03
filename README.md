@@ -1,7 +1,7 @@
 Fitna Phone
 -----------
 
-**Assalamu'alaikum my brothers & sisters in Islam**
+**Assalamu'alaikum brothers and sisters, peace be upon you!**
 
 This android application is intended to supplement ['10 Minutes Steadfast'](https://github.com/AchmadHafid/10-minutes-steadfast-android) application on my other repo.
 It can help us to fight against smart phone addiction in more fine-grained control.
@@ -11,6 +11,8 @@ You can block certain apps to be opened when you actually do nothing with it exc
 ![image](https://lh3.googleusercontent.com/iKxMEMdVSmKRFE0R_XPfSGjjBGcqMACmCxp27A7bldXr2B1Knf6cZllk62bqumt5HN0=w720-h310-rw)
 ![image](https://lh3.googleusercontent.com/8qPglHVGSDT6joagAiEBG2pQa1d8uJwsZ9KOgAnGA-TlOGUHeJwIJRywl3UIRm3wpg=w720-h310-rw)
 [![Foo](https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png)](https://play.google.com/store/apps/details?id=io.github.achmadhafid.fitnaphone)
+
+__That's it! May you find this application to be beneficial for you__<br />
 
 License
 -------
