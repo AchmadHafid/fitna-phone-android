@@ -1,20 +1,23 @@
+@file:Suppress("WildcardImport")
+
 package io.github.achmadhafid.fitnaphone
 
+import android.annotation.TargetApi
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.Service
 import android.content.Intent
 import android.graphics.Typeface
 import android.os.Build
-import android.os.Handler
 import android.text.Spannable
 import android.text.SpannableString
 import android.text.SpannableStringBuilder
 import android.text.style.BulletSpan
 import android.text.style.StyleSpan
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationCompat
 import androidx.lifecycle.LifecycleService
+import io.github.achmadhafid.zpack.ktx.*
+import io.github.achmadhafid.zpack.util.LifecycleHandler
 
 class BlockerService : LifecycleService() {
 
@@ -30,10 +33,13 @@ class BlockerService : LifecycleService() {
     private val dpSmall by dimenRes(R.dimen.small)
 
     //endregion
+    //region Handler
 
-    private val handler = Handler()
+    private val handler by LifecycleHandler(lifecycle)
 
-    //region Lifecycle Callback Function
+    //endregion
+
+    //region Lifecycle Callback
 
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
@@ -55,26 +61,22 @@ class BlockerService : LifecycleService() {
         return START_STICKY
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        handler.removeCallbacksAndMessages(null)
-    }
-
     //endregion
-    //region Helper Function
+    //region Private Helper
 
     /**
      * Create notification channel (required for API 26+)
      */
+    @TargetApi(Build.VERSION_CODES.O)
     private fun createNotification() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        if (atLeastOreo()) {
             NotificationChannel(
                 notificationChannelId,
                 notificationChannelName,
                 NotificationManager.IMPORTANCE_HIGH
             ).let {
                 notificationManager.createNotificationChannel(it.apply {
-                    importance = NotificationManager.IMPORTANCE_HIGH
+                    importance  = NotificationManager.IMPORTANCE_HIGH
                     description = notificationChannelDescription
                 })
             }
@@ -140,9 +142,9 @@ class BlockerService : LifecycleService() {
             fun rePostDelayed() = handler.postDelayed(this, scanInterval)
             override fun run() {
                 if (powerManager.isInteractive) {
-                    detectForegroundApp()?.let {
+                    foregroundApp?.let {
                         if (appList.contains(it)) {
-                            openDefaultLauncher()
+                            homeLauncher()
                         }
                     } ?: stopSelf()
                 }
@@ -155,12 +157,12 @@ class BlockerService : LifecycleService() {
 
 }
 
-//region Parameter Passing Helper Function
+//region Parameter Passing Helper
 
-val AppCompatActivity.isBlockerServiceRunning
+val MainActivity.isBlockerServiceRunning
     get() = isForegroundServiceRunning(BlockerService::class.java.name)
 
-fun AppCompatActivity.startBlockerService(
+fun MainActivity.startBlockerService(
     appList: List<AppInfo>,
     scanInterval: Long = DEFAULT_SCAN_INTERVAL
 ) {

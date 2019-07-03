@@ -5,6 +5,9 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import io.github.achmadhafid.zpack.ktx.getAppName
+import io.github.achmadhafid.zpack.ktx.installedAppsWithLaunchIntent
+import io.github.achmadhafid.zpack.ktx.notifyObserver
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -20,10 +23,13 @@ class MainActivityViewModel : ViewModel() {
     var initialized = false
         private set
 
-    fun initializeIfNeeded(context: Context): MainActivityViewModel {
+    fun initializeIfNeeded(
+        context: Context,
+        lastBlockedItems: MutableList<AppInfo>
+    ): MainActivityViewModel {
         if (_appList.value == null) {
             viewModelScope.launch {
-                loadAppList(context)
+                loadAppList(context, lastBlockedItems)
                 initialized = true
             }
         }
@@ -43,14 +49,20 @@ class MainActivityViewModel : ViewModel() {
         _appList.notifyObserver()
     }
 
-    private suspend fun loadAppList(context: Context) = withContext(Dispatchers.IO) {
-        val lisOfApps = context.getInstalledAppsWithLaunchIntent()
+    private suspend fun loadAppList(
+        context: Context,
+        lastBlockedItems: MutableList<AppInfo>
+    ) = withContext(Dispatchers.IO) {
+        val lisOfApps = context.installedAppsWithLaunchIntent
             .filter { it.packageName != context.packageName }
             .map {
+                val blocked = lastBlockedItems.find { item ->
+                    it.packageName == item.packageName
+                } != null
                 AppInfo(
                     it.packageName,
                     context.getAppName(it.packageName) ?: "",
-                    false
+                    blocked
                 )
             }
             .sortedBy { it.name }

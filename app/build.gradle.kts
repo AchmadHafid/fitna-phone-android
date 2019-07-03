@@ -11,8 +11,8 @@ android {
         applicationId = "io.github.achmadhafid.fitnaphone"
         minSdkVersion(AndroidSdk.MIN)
         targetSdkVersion(AndroidSdk.TARGET)
-        versionCode = 2
-        versionName = "2.0.0"
+        versionCode = 3
+        versionName = "2.1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -69,13 +69,18 @@ dependsOn(
     Dependency.JETPACK_COLLECTION,
     Dependency.JETPACK_LIFECYCLE,
 
-    Dependency.EXTRA_TOOLBAR_BADGE_MENU_ITEM,
     Dependency.EXTRA_TAP_TARGET_VIEW,
     Dependency.EXTRA_VIEW_ANIMATOR,
     Dependency.EXTRA_ONCE,
+    Dependency.EXTRA_ZPACK,
+    Dependency.EXTRA_SIMPLE_PREF,
     Dependency.EXTRA_LOTTIE_DIALOG,
+    Dependency.EXTRA_TOOLBAR_BADGE_MENU_ITEM,
+    Dependency.EXTRA_RECYCLER_VIEW_ANIMATORS,
 
     Dependency.TESTING_CORE,
+    Dependency.TESTING_RULES,
+    Dependency.TESTING_RUNNER,
     Dependency.TESTING_ESPRESSO,
     Dependency.TESTING_EXT_JUNIT,
     Dependency.TESTING_EXT_TRUTH,

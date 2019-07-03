@@ -18,7 +18,7 @@
         android:id="@+id/action_switch_theme"
         android:orderInCategory="300"
         android:title="@string/menu_switch_theme"
-        android:icon="@drawable/ic_theme_light_dark_24dp_svg"
+        android:icon="@drawable/ic_switch_theme_24dp"
         app:showAsAction="ifRoom"/>
 
 </menu>

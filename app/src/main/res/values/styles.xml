@@ -3,8 +3,8 @@
     <!--region Activity Theme-->
 
     <style name="AppTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:windowLightStatusBar" tools:targetApi="m">true</item>
-        <item name="android:statusBarColor">@color/colorStatusBar</item>
     </style>
 
     <!--endregion-->

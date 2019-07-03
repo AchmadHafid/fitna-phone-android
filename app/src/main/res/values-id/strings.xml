@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">Fitna Phone</string>
-    <string name="notification_channel_id" translatable="false">@string/app_name</string>
-    <string name="notification_channel_name" translatable="false">@string/app_name</string>
     <string name="notification_channel_description">Notifikasi aplikasi</string>
     <string name="blocker_notification_title">aplikasi diblok</string>
     <string name="blocker_notification_title_multi">@string/blocker_notification_title</string>
@@ -16,5 +13,7 @@
     <string name="tutorial_lock_description">Pilih aplikasi yg ingin kamu blok lalu klik di sini</string>
     <string name="menu_switch_theme">Mode Gelap</string>
     <string name="menu_clear_selection">Hapus</string>
+    <string name="tutorial_switch_theme_title">Ganti Tema</string>
+    <string name="tutorial_switch_theme_description"><![CDATA[Klik di sini untuk mengganti tema terang dan gelap]]></string>
 
 </resources>

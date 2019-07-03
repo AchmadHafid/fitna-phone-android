@@ -6,32 +6,37 @@ import org.gradle.kotlin.dsl.dependencies
 
 //region Versions
 
-private const val VERSION_KOTLIN     = "1.3.31"
-private const val VERSION_COROUTINES = "1.2.1"
+private const val VERSION_KOTLIN     = "1.3.40"
+private const val VERSION_COROUTINES = "1.3.0-M2"
 
 private const val VERSION_MATERIAL = "1.1.0-alpha07"
 
-private const val VERSION_JETPACK_CORE              = "1.2.0-alpha01"
-private const val VERSION_JETPACK_APP_COMPAT        = "1.1.0-alpha05"
-private const val VERSION_JETPACK_ACTIVITY          = "1.0.0-alpha08"
-private const val VERSION_JETPACK_CONSTRAINT_LAYOUT = "2.0.0-beta1"
-private const val VERSION_JETPACK_RECYCLER_VIEW     = "1.1.0-alpha05"
-private const val VERSION_JETPACK_COLLECTION        = "1.1.0-rc01"
+private const val VERSION_JETPACK_CORE              = "1.2.0-alpha02"
+private const val VERSION_JETPACK_APP_COMPAT        = "1.1.0-beta01"
+private const val VERSION_JETPACK_ACTIVITY          = "1.0.0-beta01"
+private const val VERSION_JETPACK_CONSTRAINT_LAYOUT = "2.0.0-beta2"
+private const val VERSION_JETPACK_RECYCLER_VIEW     = "1.1.0-alpha06"
+private const val VERSION_JETPACK_COLLECTION        = "1.1.0"
 private const val VERSION_JETPACK_LIFECYCLE         = "2.2.0-alpha01"
 
-private const val VERSION_EXTRA_TOOLBAR_BADGE_MENU_ITEM = "2.1.1"
 private const val VERSION_EXTRA_TAP_TARGET_VIEW         = "1.12.0"
-private const val VERSION_EXTRA_VIEW_ANIMATOR           = "1.1.0"
+private const val VERSION_EXTRA_VIEW_ANIMATOR           = "1.1.1"
 private const val VERSION_EXTRA_ONCE                    = "1.2.2"
-private const val VERSION_EXTRA_LOTTIE_DIALOG           = "1.0.5"
+private const val VERSION_EXTRA_ZPACK                   = "0.2.0"
+private const val VERSION_EXTRA_SIMPLE_PREF             = "1.1.0"
+private const val VERSION_EXTRA_LOTTIE_DIALOG           = "2.3.1"
+private const val VERSION_EXTRA_TOOLBAR_BADGE_MENU_ITEM = "2.2.0"
+private const val VERSION_EXTRA_RECYCLER_VIEW_ANIMATORS = "3.0.0"
 
-private const val VERSION_TESTING_CORE        = "1.2.0"
-private const val VERSION_TESTING_ESPRESSO    = "3.2.0"
-private const val VERSION_TESTING_EXT_JUNIT   = "1.1.1"
-private const val VERSION_TESTING_EXT_TRUTH   = "1.2.0"
+private const val VERSION_TESTING_CORE        = "1.2.1-alpha01"
+private const val VERSION_TESTING_RULES       = "1.3.0-alpha01"
+private const val VERSION_TESTING_RUNNER      = "1.3.0-alpha01"
+private const val VERSION_TESTING_ESPRESSO    = "3.3.0-alpha01"
+private const val VERSION_TESTING_EXT_JUNIT   = "1.1.2-alpha01"
+private const val VERSION_TESTING_EXT_TRUTH   = "1.3.0-alpha01"
 private const val VERSION_TESTING_ROBOLECTRIC = "4.3"
 
-private const val VERSION_KAPT_JETPACK_ANNOTATION = "1.1.0-rc01"
+private const val VERSION_KAPT_JETPACK_ANNOTATION = "1.1.0"
 
 //endregion
 //region Configurations
@@ -53,10 +58,6 @@ enum class Dependency(
     KOTLIN_STDLIB(
         VERSION_KOTLIN,
         "org.jetbrains.kotlin:kotlin-stdlib-jdk8" to IMPLEMENTATION
-    ),
-    KOTLIN_REFLECT(
-        VERSION_KOTLIN,
-        "org.jetbrains.kotlin:kotlin-reflect" to IMPLEMENTATION
     ),
     KOTLIN_COROUTINES(
         VERSION_COROUTINES,
@@ -110,29 +111,38 @@ enum class Dependency(
     //endregion
     //region Extra
 
-    EXTRA_TOOLBAR_BADGE_MENU_ITEM(
-        VERSION_EXTRA_TOOLBAR_BADGE_MENU_ITEM,
-        "com.github.AchmadHafid:toolbar-badge-menu-item" to IMPLEMENTATION
-    ),
 
     EXTRA_TAP_TARGET_VIEW(
         VERSION_EXTRA_TAP_TARGET_VIEW,
         "com.getkeepsafe.taptargetview:taptargetview" to IMPLEMENTATION
     ),
-
     EXTRA_VIEW_ANIMATOR(
         VERSION_EXTRA_VIEW_ANIMATOR,
         "com.github.florent37:viewanimator" to IMPLEMENTATION
     ),
-
     EXTRA_ONCE(
         VERSION_EXTRA_ONCE,
         "com.jonathanfinerty.once:once" to IMPLEMENTATION
     ),
-
+    EXTRA_ZPACK(
+        VERSION_EXTRA_ZPACK,
+        "com.github.AchmadHafid:Zpack" to IMPLEMENTATION
+    ),
+    EXTRA_SIMPLE_PREF(
+        VERSION_EXTRA_SIMPLE_PREF,
+        "com.github.AchmadHafid:SimplePref" to IMPLEMENTATION
+    ),
     EXTRA_LOTTIE_DIALOG(
         VERSION_EXTRA_LOTTIE_DIALOG,
         "com.github.AchmadHafid:lottie-dialog-android" to IMPLEMENTATION
+    ),
+    EXTRA_TOOLBAR_BADGE_MENU_ITEM(
+        VERSION_EXTRA_TOOLBAR_BADGE_MENU_ITEM,
+        "com.github.AchmadHafid:toolbar-badge-menu-item" to IMPLEMENTATION
+    ),
+    EXTRA_RECYCLER_VIEW_ANIMATORS(
+        VERSION_EXTRA_RECYCLER_VIEW_ANIMATORS,
+        "jp.wasabeef:recyclerview-animators" to IMPLEMENTATION
     ),
 
     //endregion
@@ -140,9 +150,15 @@ enum class Dependency(
 
     TESTING_CORE(
         VERSION_TESTING_CORE,
-        "androidx.test:core-ktx" to UNIFIED_TEST_IMPLEMENTATION,
-        "androidx.test:runner" to UNIFIED_TEST_IMPLEMENTATION,
+        "androidx.test:core-ktx" to UNIFIED_TEST_IMPLEMENTATION
+    ),
+    TESTING_RULES(
+        VERSION_TESTING_RULES,
         "androidx.test:rules" to UNIFIED_TEST_IMPLEMENTATION
+    ),
+    TESTING_RUNNER(
+        VERSION_TESTING_RUNNER,
+        "androidx.test:runner" to UNIFIED_TEST_IMPLEMENTATION
     ),
     TESTING_ESPRESSO(
         VERSION_TESTING_ESPRESSO,

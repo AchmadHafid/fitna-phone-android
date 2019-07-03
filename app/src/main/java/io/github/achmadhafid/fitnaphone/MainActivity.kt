@@ -2,14 +2,12 @@
 
 package io.github.achmadhafid.fitnaphone
 
-import android.content.Context
-import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
-import android.provider.Settings
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.view.animation.OvershootInterpolator
 import android.widget.ProgressBar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
@@ -20,21 +18,25 @@ import com.getkeepsafe.taptargetview.TapTargetView
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.MaterialToolbar
 import io.github.achmadhafid.lottie_dialog.*
+import io.github.achmadhafid.simplepref.extension.simplePref
+import io.github.achmadhafid.simplepref.extension.simplePrefNullable
 import io.github.achmadhafid.toolbar_badge_menu_item.createToolbarBadge
+import io.github.achmadhafid.zpack.ktx.*
+import jp.wasabeef.recyclerview.animators.SlideInUpAnimator
 
 class MainActivity : AppCompatActivity(R.layout.activity_main) {
 
     //region Resource Binding
 
-    private val tutorialTag by stringRes(R.string.tutorial_lock_tag)
+    private val tutorialTag by stringRes(R.string.tutorial_tag)
 
     //endregion
     //region View Binding
 
     private val appBarLayout: AppBarLayout by bindView(R.id.appBarLayout)
     private val toolbar: MaterialToolbar by bindView(R.id.toolbar)
-    private val recyclerView: RecyclerView by bindView(R.id.recyclerView)
     private val progressBar: ProgressBar by bindView(R.id.progressBar)
+    private val recyclerView: RecyclerView by bindView(R.id.recyclerView)
 
     //endregion
     //region View Model
@@ -44,9 +46,13 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
     //endregion
     //region Adapter
 
-    private val appListAdapter by lazy {
-        AppListAdapter(this, loadAppList()) { viewModel.updateAppInfo(it) }
-    }
+    private val appListAdapter by createAppListAdapter { viewModel.updateAppInfo(it) }
+
+    //endregion
+    //region Preferences
+
+    private var theme: Int? by simplePrefNullable()
+    private var appInfoList by simplePref{ mutableListOf<AppInfo>()}
 
     //endregion
 
@@ -54,16 +60,23 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setSupportActionBar(toolbar)
+        setMaterialToolbar(R.id.toolbar)
 
         if (isBlockerServiceRunning) {
             toastShort(R.string.message_service_already_running)
             finish()
         } else {
             //region setup recycler view
+            @Suppress("MagicNumber")
             recyclerView.apply {
+                adapter       = appListAdapter
                 layoutManager = LinearLayoutManager(context)
-                adapter = appListAdapter
+                itemAnimator  = SlideInUpAnimator(OvershootInterpolator(1.0f))
+                    .apply {
+                        addDuration    = 250L
+                        changeDuration = 100L
+                    }
+
                 setHasFixedSize(true)
                 addOnScrollListener(object : RecyclerView.OnScrollListener() {
                     override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
@@ -73,11 +86,12 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
             }
             //endregion
             //region setup view model
-            viewModel.initializeIfNeeded(this)
+            viewModel.initializeIfNeeded(this, appInfoList)
                 .appList
                 .observe(this, Observer {
-                    if (viewModel.blockedAppList.isEmpty()) {
-                        deleteAppList()
+                    with(appInfoList) {
+                        clear()
+                        addAll(viewModel.blockedAppList)
                     }
                     appListAdapter.items = it.toMutableList()
                     progressBar.visibility = View.GONE
@@ -103,22 +117,15 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
 
         createToolbarBadge(
             menu,
-            mapOf(R.id.action_lock to R.drawable.ic_lock_black_24dp),
-            R.color.color_selection_overlay,
-            R.color.color_selection_icon,
-            R.color.color_selection_icon
+            mapOf(R.id.action_lock to R.drawable.ic_lock_black_24dp)
         ) { viewModel.blockedAppList.size }
 
         //endregion
-        //region show first time tutorial on how to lock apps
+        //region show first time tutorial
 
-        menu?.findItem(R.id.action_lock)
-            ?.actionView
-            ?.let {
-                if (viewModel.initialized) {
-                    doOnce(tutorialTag) { showFirstTimeTutorial(it) }
-                }
-            }
+        if (viewModel.initialized) {
+            doOnce(tutorialTag) { showFirstTimeTutorial() }
+        }
 
         //endregion
         return true
@@ -127,78 +134,67 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
         when (item?.itemId) {
             R.id.action_clear_selection -> viewModel.clearSelection()
-            R.id.action_lock -> {
-                if (viewModel.blockedAppList.isEmpty()) {
+            R.id.action_lock -> viewModel.blockedAppList.let {
+                if (it.isEmpty()) {
                     return false
-                } else if (!hasAppUsagePermission()) {
+                } else if (!hasAppUsagePermission) {
                     showPermissionRequestDialog()
                 } else {
-                    with(viewModel.blockedAppList) {
-                        saveAppList(this)
-                        startBlockerService(this)
-                    }
+                    startBlockerService(it)
                     finish()
                 }
             }
-            R.id.action_switch_theme -> saveTheme(switchTheme())
+            R.id.action_switch_theme -> theme = toggleTheme()
         }
 
         return true
     }
 
     //endregion
+    //region Private Helper
 
-}
-
-//region Helper Function : Manage blocked app list on shared preference
-
-/**
- * Save blocked app list into shared preference
- * @param appList blocked app list
- */
-private fun MainActivity.saveAppList(appList: List<AppInfo>) {
-    with(getPreferences(Context.MODE_PRIVATE).edit()) {
-        putStringSet(SP_KEY, appList.map { "${it.packageName}$DELIMITER${it.name}" }.toMutableSet())
-        apply()
+    /**
+     * Show lock tutorial
+     */
+    private fun showFirstTimeTutorial() {
+        Handler().post {
+            TapTargetView.showFor(
+                this,
+                TapTarget.forToolbarMenuItem(
+                    toolbar,
+                    R.id.action_lock,
+                    getString(R.string.tutorial_lock_title),
+                    getString(R.string.tutorial_lock_description)
+                ).outerCircleColor(R.color.color_selection_overlay)
+                    .outerCircleAlpha(1f)
+                    .titleTextColorInt(resolveColor(R.attr.colorOnSurface))
+                    .descriptionTextColorInt(resolveColor(R.attr.colorOnSurface))
+                    .drawShadow(true)
+                    .cancelable(true)
+                    .tintTarget(true)
+                    .transparentTarget(false)
+                    .targetRadius(resources.getInteger(R.integer.tutorial_target_radius)),
+                object : TapTargetView.Listener() {
+                    override fun onTargetDismissed(view: TapTargetView?, userInitiated: Boolean) {
+                        toggleThemeTutorial()
+                        super.onTargetDismissed(view, userInitiated)
+                    }
+                }
+            )
+        }
     }
-}
 
-/**
- * Load blocked app list from shared preference
- */
-private fun MainActivity.loadAppList(): MutableList<AppInfo> = getPreferences(Context.MODE_PRIVATE)
-    .getStringSet(SP_KEY, emptySet())
-    ?.map { AppInfo(it.split(DELIMITER)[0], it.split(DELIMITER)[1], true) }
-    ?.toMutableList()
-    ?: mutableListOf()
-
-/**
- * Delete blocked app list shared preference
- */
-private fun MainActivity.deleteAppList() {
-    getPreferences(Context.MODE_PRIVATE).edit()
-        .clear()
-        .apply()
-}
-
-private const val SP_KEY = "app_list"
-private const val DELIMITER = "::"
-
-//endregion
-//region Helper Function : Show Tutorial
-
-/**
- * Show tutorial first time tutorial
- * @param view target
- */
-private fun MainActivity.showFirstTimeTutorial(view: View) {
-    Handler().post {
+    /**
+     * Show switch theme tutorial
+     */
+    private fun toggleThemeTutorial() {
         TapTargetView.showFor(
             this,
-            TapTarget.forView(
-                view,
-                getString(R.string.tutorial_lock_title),
-                getString(R.string.tutorial_lock_description)
+            TapTarget.forToolbarMenuItem(
+                toolbar,
+                R.id.action_switch_theme,
+                getString(R.string.tutorial_switch_theme_title),
+                getString(R.string.tutorial_switch_theme_description)
             ).outerCircleColor(R.color.color_selection_overlay)
                 .outerCircleAlpha(1f)
                 .titleTextColorInt(resolveColor(R.attr.colorOnSurface))
@@ -210,42 +206,32 @@ private fun MainActivity.showFirstTimeTutorial(view: View) {
                 .targetRadius(resources.getInteger(R.integer.tutorial_target_radius))
         )
     }
-}
 
-//endregion
-//region Helper Function : Show Required Permission Request Dialog
-
-fun MainActivity.showPermissionRequestDialog() {
-    lottieDialog {
-        type = LottieDialog.Type.BottomSheet
-        animation {
-            lottieFileRes = R.raw.dialog_illustration
-        }
-        title {
-            textRes = R.string.dialog_permission_required_title
-        }
-        content {
-            textRes = R.string.dialog_permission_required_message
-        }
-        positiveButton {
-            textRes = android.R.string.ok
-            iconRes = R.drawable.ic_check_black_18dp
-            onClick {
-                @Suppress("MagicNumber")
-                Handler().postDelayed({
-                    startActivity(Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS))
-                }, 250)
+    /**
+     * Show a permission request dialog description
+     */
+    private fun showPermissionRequestDialog() {
+        lottieDialog {
+            type = LottieDialog.Type.BOTTOM_SHEET
+            animation(R.raw.dialog_illustration)
+            title(R.string.dialog_permission_required_title)
+            content(R.string.dialog_permission_required_message)
+            positiveButton {
+                textRes = android.R.string.ok
+                iconRes = R.drawable.ic_check_black_18dp
+                onClick { openUsageAccessSettings() }
+            }
+            negativeButton {
+                textRes = android.R.string.cancel
+                iconRes = R.drawable.ic_close_black_18dp
+            }
+            cancel {
+                onBackPressed  = true
+                onTouchOutside = false
             }
         }
-        negativeButton {
-            textRes = android.R.string.cancel
-            iconRes = R.drawable.ic_close_black_18dp
-        }
-        cancel {
-            onBackPressed  = true
-            onTouchOutside = false
-        }
     }
-}
 
-//endregion
+    //endregion
+
+}

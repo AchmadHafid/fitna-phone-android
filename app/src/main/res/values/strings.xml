@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="tutorial_lock_tag" translatable="false">TUTORIAL_LOCK</string>
-
-    <string name="app_name">Fitna Phone</string>
+    <string name="app_name" translatable="false">Fitna Phone</string>
+    <string name="tutorial_tag" translatable="false">FIRST_TIME_TUTORIAL</string>
     <string name="notification_channel_id" translatable="false">@string/app_name</string>
     <string name="notification_channel_name" translatable="false">@string/app_name</string>
+
     <string name="notification_channel_description">Application Notification</string>
     <string name="blocker_notification_title">app blocked</string>
     <string name="blocker_notification_title_multi">apps blocked</string>
@@ -18,5 +18,7 @@
     <string name="tutorial_lock_description">Select apps you want to block and then click here</string>
     <string name="menu_switch_theme">Dark Theme</string>
     <string name="menu_clear_selection">Clear</string>
+    <string name="tutorial_switch_theme_title">Switch Theme</string>
+    <string name="tutorial_switch_theme_description"><![CDATA[Tap here to switch between light & dark theme]]></string>
 
 </resources>

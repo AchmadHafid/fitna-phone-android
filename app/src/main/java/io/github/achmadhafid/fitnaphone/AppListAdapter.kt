@@ -8,31 +8,26 @@ import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.annotation.MainThread
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.github.florent37.viewanimator.AnimationBuilder
 import com.github.florent37.viewanimator.ViewAnimator
+import io.github.achmadhafid.zpack.ktx.getAppIcon
+import io.github.achmadhafid.zpack.ktx.visibleOrInvisible
 
 class AppListAdapter(
     private val context: Context,
-    private val lastItems: MutableList<AppInfo> = mutableListOf(),
     private val onClickListener: (AppInfo) -> Unit
 ) : RecyclerView.Adapter<AppListAdapter.ViewHolder>() {
 
-    private val animationDuration by longResC(context, R.integer.animation_duration)
+    private val animationDuration by lazy {
+        context.resources
+            .getInteger(R.integer.animation_duration).toLong()
+    }
     private val iconStore: HashMap<String, Drawable> = HashMap()
     var items: MutableList<AppInfo> = mutableListOf()
         set(newItems) {
-            if (lastItems.isNotEmpty()) {
-                newItems.forEach { currentItem ->
-                    lastItems.forEach {lastItem ->
-                        if (currentItem.packageName == lastItem.packageName) {
-                            currentItem.blocked = lastItem.blocked
-                        }
-                    }
-                }
-                lastItems.clear()
-            }
             DiffUtil.calculateDiff(DiffUtilCallback(newItems, field))
                 .also {
                     field.clear()
@@ -149,3 +144,7 @@ data class AppInfo(
     val name: String,
     var blocked: Boolean
 )
+
+@MainThread
+fun MainActivity.createAppListAdapter(onClickListener: (AppInfo) -> Unit) =
+    lazy(LazyThreadSafetyMode.NONE) { AppListAdapter(this, onClickListener) }
