@@ -62,7 +62,7 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
         super.onCreate(savedInstanceState)
         setMaterialToolbar(R.id.toolbar)
 
-        if (isBlockerServiceRunning) {
+        if (BlockerService.isForeground) {
             toastShort(R.string.message_service_already_running)
             finish()
         } else {
@@ -106,10 +106,10 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
         return true
     }
 
-    override fun onPrepareOptionsMenu(menu: Menu?): Boolean {
+    override fun onPrepareOptionsMenu(menu: Menu): Boolean {
         //region hide clear icon if no selection has been made
 
-        menu?.findItem(R.id.action_clear_selection)
+        menu.findItem(R.id.action_clear_selection)
             ?.isVisible = viewModel.blockedAppList.isNotEmpty()
 
         //endregion
@@ -131,8 +131,8 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
         return true
     }
 
-    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
-        when (item?.itemId) {
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
             R.id.action_clear_selection -> viewModel.clearSelection()
             R.id.action_lock -> viewModel.blockedAppList.let {
                 if (it.isEmpty()) {
@@ -217,8 +217,9 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
             title(R.string.dialog_permission_required_title)
             content(R.string.dialog_permission_required_message)
             positiveButton {
-                textRes = android.R.string.ok
-                iconRes = R.drawable.ic_check_black_18dp
+                textRes     = android.R.string.ok
+                iconRes     = R.drawable.ic_check_black_18dp
+                actionDelay = resources.getInteger(R.integer.dialog_action_delay).toLong()
                 onClick { openUsageAccessSettings() }
             }
             negativeButton {

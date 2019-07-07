@@ -3,7 +3,6 @@ package io.github.achmadhafid.fitnaphone
 import android.content.Context
 import android.graphics.drawable.Drawable
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.ImageView
@@ -11,7 +10,6 @@ import android.widget.TextView
 import androidx.annotation.MainThread
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
-import com.github.florent37.viewanimator.AnimationBuilder
 import com.github.florent37.viewanimator.ViewAnimator
 import io.github.achmadhafid.zpack.ktx.getAppIcon
 import io.github.achmadhafid.zpack.ktx.visibleOrInvisible
@@ -93,28 +91,16 @@ class AppListAdapter(
             animate: Boolean,
             animationDuration: Long
         ) {
-            ivLock.visibleOrInvisible(show)
+            ivLock.visibleOrInvisible { show }
 
             if (animate) {
                 ViewAnimator.animate(ivOverlay)
+                    .alpha(if (show) 0f else 1f, if (show) 1f else 0f)
                     .duration(animationDuration)
-                    .fade(show)
                     .start()
             } else {
-                ivOverlay.visibleOrInvisible(show)
                 ivOverlay.alpha = if (show) 1f else 0f
             }
-        }
-
-        private fun AnimationBuilder.fade(show: Boolean): AnimationBuilder {
-            if (show) {
-                alpha(0f, 1f)
-                onStart { view.visibility = View.VISIBLE }
-            } else {
-                alpha(1f, 0f)
-                onStop { view.visibility = View.INVISIBLE }
-            }
-            return this
         }
 
     }

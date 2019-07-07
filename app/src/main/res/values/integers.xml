@@ -4,5 +4,6 @@
     <integer name="notification_id">1234</integer>
     <integer name="animation_duration">300</integer>
     <integer name="tutorial_target_radius">60</integer>
+    <integer name="dialog_action_delay">250</integer>
 
 </resources>

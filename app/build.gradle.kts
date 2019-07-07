@@ -11,18 +11,19 @@ android {
         applicationId = "io.github.achmadhafid.fitnaphone"
         minSdkVersion(AndroidSdk.MIN)
         targetSdkVersion(AndroidSdk.TARGET)
-        versionCode = 3
-        versionName = "2.1.0"
+        @Suppress("MagicNumber")
+        versionCode = 4
+        versionName = "2.2.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
         named("debug") {
             isShrinkResources = false
-            isMinifyEnabled = false
+            isMinifyEnabled   = false
         }
         named("release") {
             isShrinkResources = true
-            isMinifyEnabled = true
+            isMinifyEnabled   = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }

@@ -21,6 +21,11 @@ import io.github.achmadhafid.zpack.util.LifecycleHandler
 
 class BlockerService : LifecycleService() {
 
+    companion object {
+        var isForeground = false
+            private set
+    }
+
     //region Resource Binding
 
     private val notificationId by intRes(R.integer.notification_id)
@@ -41,7 +46,7 @@ class BlockerService : LifecycleService() {
 
     //region Lifecycle Callback
 
-    override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
 
         if (!isForeground) {
@@ -56,6 +61,8 @@ class BlockerService : LifecycleService() {
             createNotification()
             makeForeground(appList)
             scanForegroundApp(appList, scanInterval)
+
+            isForeground = true
         }
 
         return START_STICKY
@@ -144,7 +151,7 @@ class BlockerService : LifecycleService() {
                 if (powerManager.isInteractive) {
                     foregroundApp?.let {
                         if (appList.contains(it)) {
-                            homeLauncher()
+                            openHomeLauncher()
                         }
                     } ?: stopSelf()
                 }
@@ -159,9 +166,6 @@ class BlockerService : LifecycleService() {
 
 //region Parameter Passing Helper
 
-val MainActivity.isBlockerServiceRunning
-    get() = isForegroundServiceRunning(BlockerService::class.java.name)
-
 fun MainActivity.startBlockerService(
     appList: List<AppInfo>,
     scanInterval: Long = DEFAULT_SCAN_INTERVAL
@@ -171,16 +175,15 @@ fun MainActivity.startBlockerService(
         appList.forEach {
             appMap[it.packageName] = it.name
         }
-        startForegroundServiceCompat(
-            Intent(this, BlockerService::class.java)
-                .putExtra(PARAM_APP_LIST, appMap)
-                .putExtra(PARAM_SCAN_INTERVAL, scanInterval)
-        )
+        startForegroundServiceCompat<BlockerService> {
+            putExtra(PARAM_APP_LIST, appMap)
+            putExtra(PARAM_SCAN_INTERVAL, scanInterval)
+        }
     }
 }
 
-private fun extractParam(intent: Intent): Pair<HashMap<String, String>, Long>? =
-    intent.run {
+private fun extractParam(intent: Intent?): Pair<HashMap<String, String>, Long>? =
+    intent?.run {
         @Suppress("UNCHECKED_CAST")
         Pair(
             getSerializableExtra(PARAM_APP_LIST) as? HashMap<String, String> ?: return null,
