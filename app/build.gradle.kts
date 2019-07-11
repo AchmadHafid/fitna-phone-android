@@ -12,8 +12,8 @@ android {
         minSdkVersion(AndroidSdk.MIN)
         targetSdkVersion(AndroidSdk.TARGET)
         @Suppress("MagicNumber")
-        versionCode = 4
-        versionName = "2.2.0"
+        versionCode = 5
+        versionName = "2.3.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -61,6 +61,7 @@ dependsOn(
     Dependency.KOTLIN_COROUTINES,
 
     Dependency.MATERIAL,
+    Dependency.KOIN,
 
     Dependency.JETPACK_CORE,
     Dependency.JETPACK_APP_COMPAT,
@@ -71,7 +72,6 @@ dependsOn(
     Dependency.JETPACK_LIFECYCLE,
 
     Dependency.EXTRA_TAP_TARGET_VIEW,
-    Dependency.EXTRA_VIEW_ANIMATOR,
     Dependency.EXTRA_ONCE,
     Dependency.EXTRA_ZPACK,
     Dependency.EXTRA_SIMPLE_PREF,

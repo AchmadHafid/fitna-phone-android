@@ -18,14 +18,19 @@ import com.getkeepsafe.taptargetview.TapTargetView
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.MaterialToolbar
 import io.github.achmadhafid.lottie_dialog.*
-import io.github.achmadhafid.simplepref.extension.simplePref
 import io.github.achmadhafid.simplepref.extension.simplePrefNullable
 import io.github.achmadhafid.toolbar_badge_menu_item.createToolbarBadge
 import io.github.achmadhafid.zpack.ktx.*
 import jp.wasabeef.recyclerview.animators.SlideInUpAnimator
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class MainActivity : AppCompatActivity(R.layout.activity_main) {
 
+    //region Preferences
+
+    private var theme: Int? by simplePrefNullable()
+
+    //endregion
     //region Resource Binding
 
     private val tutorialTag by stringRes(R.string.tutorial_tag)
@@ -41,18 +46,14 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
     //endregion
     //region View Model
 
-    private val viewModel: MainActivityViewModel by bindViewModel()
+    private val mainViewModel: MainActivityViewModel by viewModel()
 
     //endregion
     //region Adapter
 
-    private val appListAdapter by createAppListAdapter { viewModel.updateAppInfo(it) }
-
-    //endregion
-    //region Preferences
-
-    private var theme: Int? by simplePrefNullable()
-    private var appInfoList by simplePref{ mutableListOf<AppInfo>()}
+    private val appListAdapter by createAppListAdapter {
+        mainViewModel.update(it)
+    }
 
     //endregion
 
@@ -67,36 +68,30 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
             finish()
         } else {
             //region setup recycler view
+
             @Suppress("MagicNumber")
             recyclerView.apply {
+                setHasFixedSize(true)
                 adapter       = appListAdapter
                 layoutManager = LinearLayoutManager(context)
-                itemAnimator  = SlideInUpAnimator(OvershootInterpolator(1.0f))
-                    .apply {
-                        addDuration    = 250L
-                        changeDuration = 100L
-                    }
-
-                setHasFixedSize(true)
-                addOnScrollListener(object : RecyclerView.OnScrollListener() {
-                    override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                        appBarLayout.isSelected = recyclerView.canScrollVertically(-1)
-                    }
-                })
+                itemAnimator  = SlideInUpAnimator(OvershootInterpolator(1.0f)).apply {
+                    addDuration    = 250L
+                    changeDuration = 100L
+                }
+                appBarLayout.setSelectedOnScrollDown(recyclerView)
             }
+
             //endregion
             //region setup view model
-            viewModel.initializeIfNeeded(this, appInfoList)
-                .appList
+
+            mainViewModel.appList
                 .observe(this, Observer {
-                    with(appInfoList) {
-                        clear()
-                        addAll(viewModel.blockedAppList)
-                    }
-                    appListAdapter.items = it.toMutableList()
+                    appListAdapter.items   = it.toMutableList()
                     progressBar.visibility = View.GONE
                     invalidateOptionsMenu()
+                    doOnce(tutorialTag) { showFirstTimeTutorial() }
                 })
+
             //endregion
         }
     }
@@ -110,7 +105,7 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
         //region hide clear icon if no selection has been made
 
         menu.findItem(R.id.action_clear_selection)
-            ?.isVisible = viewModel.blockedAppList.isNotEmpty()
+            ?.isVisible = mainViewModel.blockedApps.isNotEmpty()
 
         //endregion
         //region create lock icon badge
@@ -118,14 +113,7 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
         createToolbarBadge(
             menu,
             mapOf(R.id.action_lock to R.drawable.ic_lock_black_24dp)
-        ) { viewModel.blockedAppList.size }
-
-        //endregion
-        //region show first time tutorial
-
-        if (viewModel.initialized) {
-            doOnce(tutorialTag) { showFirstTimeTutorial() }
-        }
+        ) { mainViewModel.blockedApps.size }
 
         //endregion
         return true
@@ -133,14 +121,14 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.action_clear_selection -> viewModel.clearSelection()
-            R.id.action_lock -> viewModel.blockedAppList.let {
+            R.id.action_clear_selection -> mainViewModel.clearSelection()
+            R.id.action_lock -> mainViewModel.blockedApps.let {
                 if (it.isEmpty()) {
                     return false
                 } else if (!hasAppUsagePermission) {
                     showPermissionRequestDialog()
                 } else {
-                    startBlockerService(it)
+                    startForegroundServiceCompat<BlockerService>()
                     finish()
                 }
             }
@@ -153,9 +141,6 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
     //endregion
     //region Private Helper
 
-    /**
-     * Show lock tutorial
-     */
     private fun showFirstTimeTutorial() {
         Handler().post {
             TapTargetView.showFor(
@@ -184,9 +169,6 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
         }
     }
 
-    /**
-     * Show switch theme tutorial
-     */
     private fun toggleThemeTutorial() {
         TapTargetView.showFor(
             this,
@@ -207,9 +189,6 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
         )
     }
 
-    /**
-     * Show a permission request dialog description
-     */
     private fun showPermissionRequestDialog() {
         lottieDialog {
             type = LottieDialog.Type.BOTTOM_SHEET

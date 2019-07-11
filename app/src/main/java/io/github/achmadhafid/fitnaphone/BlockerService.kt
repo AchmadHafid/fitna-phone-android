@@ -5,7 +5,6 @@ package io.github.achmadhafid.fitnaphone
 import android.annotation.TargetApi
 import android.app.NotificationChannel
 import android.app.NotificationManager
-import android.app.Service
 import android.content.Intent
 import android.graphics.Typeface
 import android.os.Build
@@ -16,18 +15,22 @@ import android.text.style.BulletSpan
 import android.text.style.StyleSpan
 import androidx.core.app.NotificationCompat
 import androidx.lifecycle.LifecycleService
+import androidx.lifecycle.lifecycleScope
+import io.github.achmadhafid.simplepref.extension.simplePref
 import io.github.achmadhafid.zpack.ktx.*
-import io.github.achmadhafid.zpack.util.LifecycleHandler
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 class BlockerService : LifecycleService() {
 
-    companion object {
-        var isForeground = false
-            private set
-    }
+    //region Preferences
 
+    private val blockedApps by simplePref { mutableListOf<AppInfo>() }
+
+    //endregion
     //region Resource Binding
 
+    private val scanInterval by longRes(R.integer.scan_interval)
     private val notificationId by intRes(R.integer.notification_id)
     private val notificationTitle by stringRes(R.string.blocker_notification_title)
     private val notificationTitleMulti by stringRes(R.string.blocker_notification_title_multi)
@@ -38,44 +41,14 @@ class BlockerService : LifecycleService() {
     private val dpSmall by dimenRes(R.dimen.small)
 
     //endregion
-    //region Handler
-
-    private val handler by LifecycleHandler(lifecycle)
-
-    //endregion
 
     //region Lifecycle Callback
 
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        super.onStartCommand(intent, flags, startId)
+    override fun onCreate() {
+        super.onCreate()
+        //region Create notification
 
-        if (!isForeground) {
-            //region extract app list param
-
-            val (appList, scanInterval) = extractParam(intent) ?: run {
-                stopSelf()
-                return@onStartCommand Service.START_NOT_STICKY
-            }
-
-            //endregion
-            createNotification()
-            makeForeground(appList)
-            scanForegroundApp(appList, scanInterval)
-
-            isForeground = true
-        }
-
-        return START_STICKY
-    }
-
-    //endregion
-    //region Private Helper
-
-    /**
-     * Create notification channel (required for API 26+)
-     */
-    @TargetApi(Build.VERSION_CODES.O)
-    private fun createNotification() {
+        @TargetApi(Build.VERSION_CODES.O)
         if (atLeastOreo()) {
             NotificationChannel(
                 notificationChannelId,
@@ -88,111 +61,80 @@ class BlockerService : LifecycleService() {
                 })
             }
         }
-    }
-
-    /**
-     * make this service as foreground service
-     * @param appList list of app to be blocked
-     */
-    private fun makeForeground(appList: Map<String, String>) {
-        //region register this service as foreground service
-
-        val contentTitle = "${appList.size} ${when (appList.size) {
-            1 -> notificationTitle
-            else -> notificationTitleMulti
-        }}"
-        val contentTextShort = SpannableString(notificationText).apply {
-            setSpan(
-                StyleSpan(Typeface.BOLD),
-                0, length,
-                Spannable.SPAN_INCLUSIVE_EXCLUSIVE
-            )
-        }
-        val contentTextLong = appList.values
-            .map {
-                SpannableStringBuilder(it).apply {
-                    setSpan(
-                        BulletSpan(dpSmall),
-                        0, length,
-                        Spannable.SPAN_INCLUSIVE_EXCLUSIVE
-                    )
-                }
-            }
-            .sortedBy { it.toString() }
-            .reduce { acc, spannableString -> acc.append("\n", spannableString) }
-            .append("\n")
-            .append(contentTextShort)
-
-        startForeground(
-            notificationId, NotificationCompat.Builder(this, notificationChannelId)
-                .setContentTitle(contentTitle)
-                .setContentText(contentTextShort)
-                .setStyle(
-                    NotificationCompat.BigTextStyle()
-                        .bigText(contentTextLong)
-                )
-                .setSmallIcon(R.drawable.ic_lock_black_24dp)
-                .setPriority(NotificationCompat.PRIORITY_MAX)
-                .build()
-        )
 
         //endregion
     }
 
-    /**
-     * detect foreground app every specific interval
-     * @param appList list of app to be blocked
-     * @param scanInterval scanning interval in milliseconds
-     */
-    private fun scanForegroundApp(appList: Map<String, String>, scanInterval: Long) {
-        handler.post(object : Runnable {
-            fun rePostDelayed() = handler.postDelayed(this, scanInterval)
-            override fun run() {
-                if (powerManager.isInteractive) {
-                    foregroundApp?.let {
-                        if (appList.contains(it)) {
-                            openHomeLauncher()
-                        }
-                    } ?: stopSelf()
-                }
-                rePostDelayed()
+    @Suppress("ComplexMethod")
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        super.onStartCommand(intent, flags, startId)
+
+        if (!isForeground) {
+            //region Make this service foreground
+
+            val contentTitle     = "${blockedApps.size} ${when (blockedApps.size) {
+                1    -> notificationTitle
+                else -> notificationTitleMulti
+            }}"
+            val contentTextShort = SpannableString(notificationText).apply {
+                setSpan(
+                    StyleSpan(Typeface.BOLD),
+                    0, length,
+                    Spannable.SPAN_INCLUSIVE_EXCLUSIVE
+                )
             }
-        })
+            val contentTextLong  = blockedApps
+                .map {appInfo ->
+                    SpannableStringBuilder(appInfo.name).apply {
+                        setSpan(
+                            BulletSpan(dpSmall),
+                            0, length,
+                            Spannable.SPAN_INCLUSIVE_EXCLUSIVE
+                        )
+                    }
+                }
+                .sortedBy { appName -> appName.toString() }
+                .reduce { acc, spannableString -> acc.append("\n", spannableString) }
+                .append("\n")
+                .append(contentTextShort)
+            val notification = NotificationCompat.Builder(this, notificationChannelId)
+                .setSmallIcon(R.drawable.ic_lock_black_24dp)
+                .setPriority(NotificationCompat.PRIORITY_MAX)
+                .setOnlyAlertOnce(true)
+                .setContentTitle(contentTitle)
+                .setContentText(contentTextShort)
+                .setStyle(NotificationCompat.BigTextStyle().bigText(contentTextLong))
+                .build()
+            startForeground(notificationId, notification)
+
+            //endregion
+            //region Scan foreground app
+
+            lifecycleScope.launch {
+                while (true) {
+                    delay(scanInterval)
+                    if (powerManager.isInteractive) {
+                        foregroundApp?.let {packageName ->
+                            if (blockedApps.contains(packageName)) {
+                                openHomeLauncher()
+                            }
+                        } ?: stopSelf()
+                    }
+                }
+            }
+
+            //endregion
+            isForeground = true
+        }
+
+        return START_STICKY
     }
 
     //endregion
 
-}
-
-//region Parameter Passing Helper
-
-fun MainActivity.startBlockerService(
-    appList: List<AppInfo>,
-    scanInterval: Long = DEFAULT_SCAN_INTERVAL
-) {
-    if (appList.isNotEmpty()) {
-        val appMap = HashMap<String, String>()
-        appList.forEach {
-            appMap[it.packageName] = it.name
-        }
-        startForegroundServiceCompat<BlockerService> {
-            putExtra(PARAM_APP_LIST, appMap)
-            putExtra(PARAM_SCAN_INTERVAL, scanInterval)
-        }
-    }
-}
-
-private fun extractParam(intent: Intent?): Pair<HashMap<String, String>, Long>? =
-    intent?.run {
-        @Suppress("UNCHECKED_CAST")
-        Pair(
-            getSerializableExtra(PARAM_APP_LIST) as? HashMap<String, String> ?: return null,
-            getLongExtra(PARAM_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL)
-        )
+    companion object {
+        var isForeground = false
+            private set
     }
 
-private const val PARAM_APP_LIST        = "app_list"
-private const val PARAM_SCAN_INTERVAL   = "scan_interval"
-private const val DEFAULT_SCAN_INTERVAL = 3_000L
-
-//endregion
+}

@@ -1,3 +1,5 @@
+@file:Suppress("WildcardImport")
+
 package io.github.achmadhafid.fitnaphone
 
 import android.content.Context
@@ -5,68 +7,54 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import io.github.achmadhafid.zpack.ktx.getAppName
+import io.github.achmadhafid.simplepref.extension.savePref
+import io.github.achmadhafid.simplepref.extension.saveThanDisposePref
+import io.github.achmadhafid.simplepref.extension.simplePref
 import io.github.achmadhafid.zpack.ktx.installedAppsWithLaunchIntent
 import io.github.achmadhafid.zpack.ktx.notifyObserver
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
-class MainActivityViewModel : ViewModel() {
+class MainActivityViewModel(private val context: Context) : ViewModel() {
 
     private val _appList: MutableLiveData<List<AppInfo>> = MutableLiveData()
     val appList: LiveData<List<AppInfo>> = _appList
-    val blockedAppList: List<AppInfo>
-        get() = _appList.value
-            ?.filter { it.blocked }
-            ?: emptyList()
-    var initialized = false
-        private set
+    val blockedApps by simplePref(context = context){ mutableListOf<AppInfo>() }
 
-    fun initializeIfNeeded(
-        context: Context,
-        lastBlockedItems: MutableList<AppInfo>
-    ): MainActivityViewModel {
-        if (_appList.value == null) {
-            viewModelScope.launch {
-                loadAppList(context, lastBlockedItems)
-                initialized = true
-            }
+    init {
+        viewModelScope.launch(Dispatchers.IO) {
+            val lisOfApps = context.installedAppsWithLaunchIntent
+                .filter { it.packageName != context.packageName }
+                .map { AppInfo(context, it.packageName, blockedApps.contains(it.packageName)) }
+                .sortedBy { it.name }
+            _appList.postValue(lisOfApps)
         }
-        return this
     }
 
-    fun updateAppInfo(appInfo: AppInfo) {
-        _appList.value?.forEach {
-            if (it.packageName == appInfo.packageName)
-                it.blocked = appInfo.blocked
+    fun update(appInfo: AppInfo) {
+        savePref { blockedApps.addIfBlockedOrRemove(appInfo) }
+
+        with(_appList) {
+            value?.let {
+                it.updateBlocked(appInfo)
+                notifyObserver()
+            }
         }
-        _appList.notifyObserver()
     }
 
     fun clearSelection() {
-        _appList.value?.forEach { it.blocked = false } ?: return
-        _appList.notifyObserver()
-    }
+        savePref { blockedApps.clear() }
 
-    private suspend fun loadAppList(
-        context: Context,
-        lastBlockedItems: MutableList<AppInfo>
-    ) = withContext(Dispatchers.IO) {
-        val lisOfApps = context.installedAppsWithLaunchIntent
-            .filter { it.packageName != context.packageName }
-            .map {
-                val blocked = lastBlockedItems.find { item ->
-                    it.packageName == item.packageName
-                } != null
-                AppInfo(
-                    it.packageName,
-                    context.getAppName(it.packageName) ?: "",
-                    blocked
-                )
+        with(_appList) {
+            value?.let {
+                it.resetBlocked()
+                notifyObserver()
             }
-            .sortedBy { it.name }
-        _appList.postValue(lisOfApps)
+        }
     }
 
+    override fun onCleared() {
+        saveThanDisposePref()
+        super.onCleared()
+    }
 }

@@ -10,7 +10,6 @@ import android.widget.TextView
 import androidx.annotation.MainThread
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
-import com.github.florent37.viewanimator.ViewAnimator
 import io.github.achmadhafid.zpack.ktx.getAppIcon
 import io.github.achmadhafid.zpack.ktx.visibleOrInvisible
 
@@ -19,18 +18,11 @@ class AppListAdapter(
     private val onClickListener: (AppInfo) -> Unit
 ) : RecyclerView.Adapter<AppListAdapter.ViewHolder>() {
 
-    private val animationDuration by lazy {
-        context.resources
-            .getInteger(R.integer.animation_duration).toLong()
-    }
     private val iconStore: HashMap<String, Drawable> = HashMap()
     var items: MutableList<AppInfo> = mutableListOf()
         set(newItems) {
             DiffUtil.calculateDiff(DiffUtilCallback(newItems, field))
-                .also {
-                    field.clear()
-                    newItems.forEach { field.add(it.copy()) }
-                }
+                .also { field = newItems.map { it.copy() }.toMutableList() }
                 .dispatchUpdatesTo(this)
         }
 
@@ -50,7 +42,6 @@ class AppListAdapter(
             holder.bindAppInfo(
                 this,
                 getIconDrawable(packageName),
-                animationDuration,
                 onClickListener
             )
         }
@@ -63,6 +54,8 @@ class AppListAdapter(
                 it
             }
 
+    //region View Holder
+
     class ViewHolder(private val container: FrameLayout) : RecyclerView.ViewHolder(container) {
 
         private val tvName: TextView = container.findViewById(R.id.tvName)
@@ -73,39 +66,30 @@ class AppListAdapter(
         fun bindAppInfo(
             appInfo: AppInfo,
             iconDrawable: Drawable?,
-            animationDuration: Long,
             onClickListener: (AppInfo) -> Unit
         ) {
+            fun showLockIcon(show: Boolean) {
+                ivLock.visibleOrInvisible { show }
+                ivOverlay.alpha = if (show) 1f else 0f
+            }
+
             tvName.text = appInfo.name
             iconDrawable?.let { ivIcon.setImageDrawable(it) }
-            showLockIcon(appInfo.blocked, false, animationDuration)
+            showLockIcon(appInfo.blocked)
             container.setOnClickListener {
                 appInfo.blocked = !appInfo.blocked
-                showLockIcon(appInfo.blocked, true, animationDuration)
+                showLockIcon(appInfo.blocked)
                 onClickListener(appInfo)
-            }
-        }
-
-        private fun showLockIcon(
-            show: Boolean,
-            animate: Boolean,
-            animationDuration: Long
-        ) {
-            ivLock.visibleOrInvisible { show }
-
-            if (animate) {
-                ViewAnimator.animate(ivOverlay)
-                    .alpha(if (show) 0f else 1f, if (show) 1f else 0f)
-                    .duration(animationDuration)
-                    .start()
-            } else {
-                ivOverlay.alpha = if (show) 1f else 0f
             }
         }
 
     }
 
+    //endregion
+
 }
+
+//region Diff Util Helper
 
 class DiffUtilCallback(
     private val newItems: List<AppInfo>,
@@ -125,12 +109,11 @@ class DiffUtilCallback(
 
 }
 
-data class AppInfo(
-    val packageName: String,
-    val name: String,
-    var blocked: Boolean
-)
+//endregion
+//region Extension Helper
 
 @MainThread
 fun MainActivity.createAppListAdapter(onClickListener: (AppInfo) -> Unit) =
     lazy(LazyThreadSafetyMode.NONE) { AppListAdapter(this, onClickListener) }
+
+//endregion
