@@ -6,37 +6,38 @@ import org.gradle.kotlin.dsl.dependencies
 
 //region Versions
 
-private const val VERSION_KOTLIN     = "1.3.41"
-private const val VERSION_COROUTINES = "1.3.0-M2"
+private object Versions {
 
-private const val VERSION_MATERIAL = "1.1.0-alpha07"
-private const val VERSION_KOIN     = "2.0.1"
+    const val CORE_KOTLIN     = "1.3.41"
+    const val CORE_COROUTINES = "1.3.0-M2"
+    const val CORE_MATERIAL   = "1.1.0-alpha08"
+    const val CORE_KOIN       = "2.0.1"
 
-private const val VERSION_JETPACK_CORE              = "1.2.0-alpha02"
-private const val VERSION_JETPACK_APP_COMPAT        = "1.1.0-rc01"
-private const val VERSION_JETPACK_ACTIVITY          = "1.1.0-alpha01"
-private const val VERSION_JETPACK_CONSTRAINT_LAYOUT = "2.0.0-beta2"
-private const val VERSION_JETPACK_RECYCLER_VIEW     = "1.1.0-beta01"
-private const val VERSION_JETPACK_COLLECTION        = "1.1.0"
-private const val VERSION_JETPACK_LIFECYCLE         = "2.2.0-alpha02"
+    const val JETPACK_CORE              = "1.2.0-alpha02"
+    const val JETPACK_APP_COMPAT        = "1.1.0-rc01"
+    const val JETPACK_LIFECYCLE         = "2.2.0-alpha02"
+    const val JETPACK_ACTIVITY          = "1.1.0-alpha01"
+    const val JETPACK_CONSTRAINT_LAYOUT = "2.0.0-beta2"
+    const val JETPACK_RECYCLER_VIEW     = "1.1.0-beta01"
+    const val JETPACK_COLLECTION        = "1.1.0"
 
-private const val VERSION_EXTRA_TAP_TARGET_VIEW         = "1.12.0"
-private const val VERSION_EXTRA_ONCE                    = "1.2.2"
-private const val VERSION_EXTRA_ZPACK                   = "0.4.0"
-private const val VERSION_EXTRA_SIMPLE_PREF             = "1.2.0"
-private const val VERSION_EXTRA_LOTTIE_DIALOG           = "2.4.0"
-private const val VERSION_EXTRA_TOOLBAR_BADGE_MENU_ITEM = "2.2.1"
-private const val VERSION_EXTRA_RECYCLER_VIEW_ANIMATORS = "3.0.0"
+    const val EXTRA_ZPACK                   = "0.5.2"
+    const val EXTRA_SIMPLE_PREF             = "1.3.1"
+    const val EXTRA_LOTTIE_DIALOG           = "2.6.0"
+    const val EXTRA_TOOLBAR_BADGE_MENU_ITEM = "2.2.1"
+    const val EXTRA_ONCE                    = "1.2.2"
+    const val EXTRA_RECYCLER_VIEW_ANIMATORS = "3.0.0"
+    const val EXTRA_TAP_TARGET_VIEW         = "1.12.0"
 
-private const val VERSION_TESTING_CORE        = "1.2.1-alpha01"
-private const val VERSION_TESTING_RULES       = "1.3.0-alpha01"
-private const val VERSION_TESTING_RUNNER      = "1.3.0-alpha01"
-private const val VERSION_TESTING_ESPRESSO    = "3.3.0-alpha01"
-private const val VERSION_TESTING_EXT_JUNIT   = "1.1.2-alpha01"
-private const val VERSION_TESTING_EXT_TRUTH   = "1.3.0-alpha01"
-private const val VERSION_TESTING_ROBOLECTRIC = "4.3"
+    const val TESTING_CORE        = "1.2.1-alpha02"
+    const val TESTING_RULES       = "1.3.0-alpha02"
+    const val TESTING_RUNNER      = "1.3.0-alpha02"
+    const val TESTING_ESPRESSO    = "3.3.0-alpha02"
+    const val TESTING_EXT_JUNIT   = "1.1.2-alpha02"
+    const val TESTING_EXT_TRUTH   = "1.3.0-alpha02"
+    const val TESTING_ROBOLECTRIC = "4.3"
 
-private const val VERSION_KAPT_JETPACK_ANNOTATION = "1.1.0"
+}
 
 //endregion
 //region Configurations
@@ -45,160 +46,149 @@ private val IMPLEMENTATION              = hashSetOf("implementation")
 private val TEST_IMPLEMENTATION         = hashSetOf("testImplementation")
 private val ANDROID_TEST_IMPLEMENTATION = hashSetOf("androidTestImplementation")
 private val UNIFIED_TEST_IMPLEMENTATION = TEST_IMPLEMENTATION + ANDROID_TEST_IMPLEMENTATION
-private val KAPT                        = hashSetOf("kapt")
 
 //endregion
 
 enum class Dependency(
     private val version: String,
-    private vararg val configs: Pair<String, Set<String>>
+    private vararg val configs: Pair<Set<String>, String>
 ) {
-    //region Kotlin
-
-    KOTLIN_STDLIB(
-        VERSION_KOTLIN,
-        "org.jetbrains.kotlin:kotlin-stdlib-jdk8" to IMPLEMENTATION
-    ),
-    KOTLIN_COROUTINES(
-        VERSION_COROUTINES,
-        "org.jetbrains.kotlinx:kotlinx-coroutines-core" to IMPLEMENTATION,
-        "org.jetbrains.kotlinx:kotlinx-coroutines-android" to IMPLEMENTATION
-    ),
-
-    //endregion
     //region Core
 
-    MATERIAL(
-        VERSION_MATERIAL,
-        "com.google.android.material:material" to IMPLEMENTATION
+    KOTLIN_STDLIB(
+        Versions.CORE_KOTLIN,
+        IMPLEMENTATION to "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
     ),
-
+    KOTLIN_COROUTINES(
+        Versions.CORE_COROUTINES,
+        IMPLEMENTATION to "org.jetbrains.kotlinx:kotlinx-coroutines-core",
+        IMPLEMENTATION to "org.jetbrains.kotlinx:kotlinx-coroutines-android"
+    ),
+    MATERIAL(
+        Versions.CORE_MATERIAL,
+        IMPLEMENTATION to "com.google.android.material:material"
+    ),
     KOIN(
-        VERSION_KOIN,
-        "org.koin:koin-core" to IMPLEMENTATION,
-        "org.koin:koin-android" to IMPLEMENTATION,
-        "org.koin:koin-androidx-scope" to IMPLEMENTATION,
-        "org.koin:koin-androidx-viewmodel" to IMPLEMENTATION
+        Versions.CORE_KOIN,
+        IMPLEMENTATION to "org.koin:koin-core",
+        IMPLEMENTATION to "org.koin:koin-android",
+        IMPLEMENTATION to "org.koin:koin-androidx-scope",
+        IMPLEMENTATION to "org.koin:koin-androidx-viewmodel",
+        TEST_IMPLEMENTATION to "org.koin:koin-test"
     ),
 
     //endregion
     //region Jetpack
 
     JETPACK_CORE(
-        VERSION_JETPACK_CORE,
-        "androidx.core:core-ktx" to IMPLEMENTATION
-    ),
-    JETPACK_ACTIVITY(
-        VERSION_JETPACK_ACTIVITY,
-        "androidx.activity:activity-ktx" to IMPLEMENTATION
+        Versions.JETPACK_CORE,
+        IMPLEMENTATION to "androidx.core:core-ktx"
     ),
     JETPACK_APP_COMPAT(
-        VERSION_JETPACK_APP_COMPAT,
-        "androidx.appcompat:appcompat" to IMPLEMENTATION
-    ),
-    JETPACK_CONSTRAINT_LAYOUT(
-        VERSION_JETPACK_CONSTRAINT_LAYOUT,
-        "androidx.constraintlayout:constraintlayout" to IMPLEMENTATION
-    ),
-    JETPACK_RECYCLER_VIEW(
-        VERSION_JETPACK_RECYCLER_VIEW,
-        "androidx.recyclerview:recyclerview" to IMPLEMENTATION
-    ),
-    JETPACK_COLLECTION(
-        VERSION_JETPACK_COLLECTION,
-        "androidx.collection:collection-ktx" to IMPLEMENTATION
+        Versions.JETPACK_APP_COMPAT,
+        IMPLEMENTATION to "androidx.appcompat:appcompat"
     ),
     JETPACK_LIFECYCLE(
-        VERSION_JETPACK_LIFECYCLE,
-        "androidx.lifecycle:lifecycle-extensions" to IMPLEMENTATION,
-        "androidx.lifecycle:lifecycle-livedata-ktx" to IMPLEMENTATION,
-        "androidx.lifecycle:lifecycle-viewmodel-ktx" to IMPLEMENTATION,
-        "androidx.lifecycle:lifecycle-compiler" to KAPT
+        Versions.JETPACK_LIFECYCLE,
+        IMPLEMENTATION to "androidx.lifecycle:lifecycle-common-java8",
+        IMPLEMENTATION to "androidx.lifecycle:lifecycle-livedata-ktx",
+        IMPLEMENTATION to "androidx.lifecycle:lifecycle-viewmodel-ktx",
+        IMPLEMENTATION to "androidx.lifecycle:lifecycle-extensions"
+    ),
+    JETPACK_ACTIVITY(
+        Versions.JETPACK_ACTIVITY,
+        IMPLEMENTATION to "androidx.activity:activity-ktx"
+    ),
+    JETPACK_CONSTRAINT_LAYOUT(
+        Versions.JETPACK_CONSTRAINT_LAYOUT,
+        IMPLEMENTATION to "androidx.constraintlayout:constraintlayout"
+    ),
+    JETPACK_RECYCLER_VIEW(
+        Versions.JETPACK_RECYCLER_VIEW,
+        IMPLEMENTATION to "androidx.recyclerview:recyclerview"
+    ),
+    JETPACK_COLLECTION(
+        Versions.JETPACK_COLLECTION,
+        IMPLEMENTATION to "androidx.collection:collection-ktx"
     ),
 
     //endregion
     //region Extra
 
-    EXTRA_TAP_TARGET_VIEW(
-        VERSION_EXTRA_TAP_TARGET_VIEW,
-        "com.getkeepsafe.taptargetview:taptargetview" to IMPLEMENTATION
-    ),
-    EXTRA_ONCE(
-        VERSION_EXTRA_ONCE,
-        "com.jonathanfinerty.once:once" to IMPLEMENTATION
-    ),
     EXTRA_ZPACK(
-        VERSION_EXTRA_ZPACK,
-        "com.github.AchmadHafid:Zpack" to IMPLEMENTATION
+        Versions.EXTRA_ZPACK,
+        IMPLEMENTATION to "com.github.AchmadHafid:Zpack"
     ),
     EXTRA_SIMPLE_PREF(
-        VERSION_EXTRA_SIMPLE_PREF,
-        "com.github.AchmadHafid:SimplePref" to IMPLEMENTATION
+        Versions.EXTRA_SIMPLE_PREF,
+        IMPLEMENTATION to "com.github.AchmadHafid:SimplePref"
     ),
     EXTRA_LOTTIE_DIALOG(
-        VERSION_EXTRA_LOTTIE_DIALOG,
-        "com.github.AchmadHafid:lottie-dialog-android" to IMPLEMENTATION
+        Versions.EXTRA_LOTTIE_DIALOG,
+        IMPLEMENTATION to "com.github.AchmadHafid:LottieDialog"
     ),
     EXTRA_TOOLBAR_BADGE_MENU_ITEM(
-        VERSION_EXTRA_TOOLBAR_BADGE_MENU_ITEM,
-        "com.github.AchmadHafid:toolbar-badge-menu-item" to IMPLEMENTATION
+        Versions.EXTRA_TOOLBAR_BADGE_MENU_ITEM,
+        IMPLEMENTATION to "com.github.AchmadHafid:toolbar-badge-menu-item"
+    ),
+    EXTRA_ONCE(
+        Versions.EXTRA_ONCE,
+        IMPLEMENTATION to "com.jonathanfinerty.once:once"
     ),
     EXTRA_RECYCLER_VIEW_ANIMATORS(
-        VERSION_EXTRA_RECYCLER_VIEW_ANIMATORS,
-        "jp.wasabeef:recyclerview-animators" to IMPLEMENTATION
+        Versions.EXTRA_RECYCLER_VIEW_ANIMATORS,
+        IMPLEMENTATION to "jp.wasabeef:recyclerview-animators"
+    ),
+    EXTRA_TAP_TARGET_VIEW(
+        Versions.EXTRA_TAP_TARGET_VIEW,
+        IMPLEMENTATION to "com.getkeepsafe.taptargetview:taptargetview"
     ),
 
     //endregion
     //region Testing
 
     TESTING_CORE(
-        VERSION_TESTING_CORE,
-        "androidx.test:core-ktx" to UNIFIED_TEST_IMPLEMENTATION
+        Versions.TESTING_CORE,
+        UNIFIED_TEST_IMPLEMENTATION to "androidx.test:core-ktx"
     ),
+
     TESTING_RULES(
-        VERSION_TESTING_RULES,
-        "androidx.test:rules" to UNIFIED_TEST_IMPLEMENTATION
+        Versions.TESTING_RULES,
+        UNIFIED_TEST_IMPLEMENTATION to "androidx.test:rules"
     ),
+
     TESTING_RUNNER(
-        VERSION_TESTING_RUNNER,
-        "androidx.test:runner" to UNIFIED_TEST_IMPLEMENTATION
+        Versions.TESTING_RUNNER,
+        UNIFIED_TEST_IMPLEMENTATION to "androidx.test:runner"
     ),
     TESTING_ESPRESSO(
-        VERSION_TESTING_ESPRESSO,
-        "androidx.test.espresso:espresso-contrib" to UNIFIED_TEST_IMPLEMENTATION,
-        "androidx.test.espresso:espresso-intents" to UNIFIED_TEST_IMPLEMENTATION,
-        "androidx.test.espresso:espresso-accessibility" to UNIFIED_TEST_IMPLEMENTATION,
-        "androidx.test.espresso:espresso-remote" to UNIFIED_TEST_IMPLEMENTATION,
-        "androidx.test.espresso.idling:idling-concurrent" to UNIFIED_TEST_IMPLEMENTATION,
-        "androidx.test.espresso.idling:idling-net" to UNIFIED_TEST_IMPLEMENTATION
+        Versions.TESTING_ESPRESSO,
+        UNIFIED_TEST_IMPLEMENTATION to "androidx.test.espresso:espresso-contrib",
+        UNIFIED_TEST_IMPLEMENTATION to "androidx.test.espresso:espresso-intents",
+        UNIFIED_TEST_IMPLEMENTATION to "androidx.test.espresso:espresso-accessibility",
+        UNIFIED_TEST_IMPLEMENTATION to "androidx.test.espresso:espresso-remote",
+        UNIFIED_TEST_IMPLEMENTATION to "androidx.test.espresso.idling:idling-concurrent",
+        UNIFIED_TEST_IMPLEMENTATION to "androidx.test.espresso.idling:idling-net"
     ),
     TESTING_EXT_JUNIT(
-        VERSION_TESTING_EXT_JUNIT,
-        "androidx.test.ext:junit-ktx" to UNIFIED_TEST_IMPLEMENTATION
+        Versions.TESTING_EXT_JUNIT,
+        UNIFIED_TEST_IMPLEMENTATION to "androidx.test.ext:junit-ktx"
     ),
     TESTING_EXT_TRUTH(
-        VERSION_TESTING_EXT_TRUTH,
-        "androidx.test.ext:truth" to UNIFIED_TEST_IMPLEMENTATION
+        Versions.TESTING_EXT_TRUTH,
+        UNIFIED_TEST_IMPLEMENTATION to "androidx.test.ext:truth"
     ),
     TESTING_ROBOLECTRIC(
-        VERSION_TESTING_ROBOLECTRIC,
-        "org.robolectric:robolectric" to TEST_IMPLEMENTATION
-    ),
-
-    //endregion
-    //region Annotation Processor
-
-    KAPT_JETPACK_ANNOTATION(
-        VERSION_KAPT_JETPACK_ANNOTATION,
-        "androidx.annotation:annotation" to KAPT
+        Versions.TESTING_ROBOLECTRIC,
+        TEST_IMPLEMENTATION to "org.robolectric:robolectric"
     );
 
     //endregion
 
     operator fun invoke(scope: DependencyHandlerScope) {
         configs.forEach {
-            it.second.forEach {config ->
-                scope.add(config, "${it.first}:$version")
+            it.first.forEach {config ->
+                scope.add(config, "${it.second}:$version")
             }
         }
     }

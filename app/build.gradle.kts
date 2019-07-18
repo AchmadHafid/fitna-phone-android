@@ -12,8 +12,8 @@ android {
         minSdkVersion(AndroidSdk.MIN)
         targetSdkVersion(AndroidSdk.TARGET)
         @Suppress("MagicNumber")
-        versionCode = 5
-        versionName = "2.3.0"
+        versionCode = 6
+        versionName = "2.4.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -59,25 +59,24 @@ android {
 dependsOn(
     Dependency.KOTLIN_STDLIB,
     Dependency.KOTLIN_COROUTINES,
-
     Dependency.MATERIAL,
     Dependency.KOIN,
 
     Dependency.JETPACK_CORE,
     Dependency.JETPACK_APP_COMPAT,
+    Dependency.JETPACK_LIFECYCLE,
     Dependency.JETPACK_ACTIVITY,
     Dependency.JETPACK_CONSTRAINT_LAYOUT,
     Dependency.JETPACK_RECYCLER_VIEW,
     Dependency.JETPACK_COLLECTION,
-    Dependency.JETPACK_LIFECYCLE,
 
-    Dependency.EXTRA_TAP_TARGET_VIEW,
-    Dependency.EXTRA_ONCE,
     Dependency.EXTRA_ZPACK,
     Dependency.EXTRA_SIMPLE_PREF,
     Dependency.EXTRA_LOTTIE_DIALOG,
     Dependency.EXTRA_TOOLBAR_BADGE_MENU_ITEM,
+    Dependency.EXTRA_ONCE,
     Dependency.EXTRA_RECYCLER_VIEW_ANIMATORS,
+    Dependency.EXTRA_TAP_TARGET_VIEW,
 
     Dependency.TESTING_CORE,
     Dependency.TESTING_RULES,
@@ -85,7 +84,5 @@ dependsOn(
     Dependency.TESTING_ESPRESSO,
     Dependency.TESTING_EXT_JUNIT,
     Dependency.TESTING_EXT_TRUTH,
-    Dependency.TESTING_ROBOLECTRIC,
-
-    Dependency.KAPT_JETPACK_ANNOTATION
+    Dependency.TESTING_ROBOLECTRIC
 )
