@@ -1,5 +1,3 @@
-@file:Suppress("WildcardImport")
-
 package io.github.achmadhafid.fitnaphone
 
 import android.annotation.TargetApi
@@ -17,7 +15,15 @@ import androidx.core.app.NotificationCompat
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.lifecycleScope
 import io.github.achmadhafid.simplepref.extension.simplePref
-import io.github.achmadhafid.zpack.ktx.*
+import io.github.achmadhafid.zpack.ktx.atLeastOreo
+import io.github.achmadhafid.zpack.ktx.dimenRes
+import io.github.achmadhafid.zpack.ktx.foregroundApp
+import io.github.achmadhafid.zpack.ktx.intRes
+import io.github.achmadhafid.zpack.ktx.longRes
+import io.github.achmadhafid.zpack.ktx.notificationManager
+import io.github.achmadhafid.zpack.ktx.openHomeLauncher
+import io.github.achmadhafid.zpack.ktx.powerManager
+import io.github.achmadhafid.zpack.ktx.stringRes
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 

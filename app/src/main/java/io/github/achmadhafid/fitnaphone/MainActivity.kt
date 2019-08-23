@@ -1,5 +1,3 @@
-@file:Suppress("WildcardImport")
-
 package io.github.achmadhafid.fitnaphone
 
 import android.os.Bundle
@@ -17,10 +15,27 @@ import com.getkeepsafe.taptargetview.TapTarget
 import com.getkeepsafe.taptargetview.TapTargetView
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.MaterialToolbar
-import io.github.achmadhafid.lottie_dialog.*
+import io.github.achmadhafid.lottie_dialog.lottieConfirmationDialog
+import io.github.achmadhafid.lottie_dialog.model.LottieDialogType
+import io.github.achmadhafid.lottie_dialog.model.onClick
+import io.github.achmadhafid.lottie_dialog.withAnimation
+import io.github.achmadhafid.lottie_dialog.withCancelOption
+import io.github.achmadhafid.lottie_dialog.withContent
+import io.github.achmadhafid.lottie_dialog.withNegativeButton
+import io.github.achmadhafid.lottie_dialog.withPositiveButton
+import io.github.achmadhafid.lottie_dialog.withTitle
 import io.github.achmadhafid.simplepref.extension.simplePrefNullable
 import io.github.achmadhafid.toolbar_badge_menu_item.createToolbarBadge
-import io.github.achmadhafid.zpack.ktx.*
+import io.github.achmadhafid.zpack.ktx.bindView
+import io.github.achmadhafid.zpack.ktx.hasAppUsagePermission
+import io.github.achmadhafid.zpack.ktx.openUsageAccessSettings
+import io.github.achmadhafid.zpack.ktx.resolveColor
+import io.github.achmadhafid.zpack.ktx.setMaterialToolbar
+import io.github.achmadhafid.zpack.ktx.setSelectedOnScrollDown
+import io.github.achmadhafid.zpack.ktx.startForegroundServiceCompat
+import io.github.achmadhafid.zpack.ktx.stringRes
+import io.github.achmadhafid.zpack.ktx.toastShort
+import io.github.achmadhafid.zpack.ktx.toggleTheme
 import jp.wasabeef.recyclerview.animators.SlideInUpAnimator
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
@@ -190,25 +205,22 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
     }
 
     private fun showPermissionRequestDialog() {
-        lottieDialog {
-            type = LottieDialog.Type.BOTTOM_SHEET
-            animation(R.raw.dialog_illustration)
-            title(R.string.dialog_permission_required_title)
-            content(R.string.dialog_permission_required_message)
-            positiveButton {
+        lottieConfirmationDialog {
+            type = LottieDialogType.BOTTOM_SHEET
+            withAnimation(R.raw.dialog_illustration)
+            withTitle(R.string.dialog_permission_required_title)
+            withContent(R.string.dialog_permission_required_message)
+            withPositiveButton {
                 textRes     = android.R.string.ok
                 iconRes     = R.drawable.ic_check_black_18dp
                 actionDelay = resources.getInteger(R.integer.dialog_action_delay).toLong()
                 onClick { openUsageAccessSettings() }
             }
-            negativeButton {
+            withNegativeButton {
                 textRes = android.R.string.cancel
                 iconRes = R.drawable.ic_close_black_18dp
             }
-            cancel {
-                onBackPressed  = true
-                onTouchOutside = false
-            }
+            withCancelOption { onTouchOutside = false }
         }
     }
 
