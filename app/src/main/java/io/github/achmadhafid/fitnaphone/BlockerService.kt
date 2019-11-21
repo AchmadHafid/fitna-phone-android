@@ -14,24 +14,17 @@ import android.text.style.StyleSpan
 import androidx.core.app.NotificationCompat
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.lifecycleScope
-import io.github.achmadhafid.simplepref.extension.simplePref
-import io.github.achmadhafid.zpack.ktx.atLeastOreo
-import io.github.achmadhafid.zpack.ktx.dimenRes
-import io.github.achmadhafid.zpack.ktx.foregroundApp
-import io.github.achmadhafid.zpack.ktx.intRes
-import io.github.achmadhafid.zpack.ktx.longRes
-import io.github.achmadhafid.zpack.ktx.notificationManager
-import io.github.achmadhafid.zpack.ktx.openHomeLauncher
-import io.github.achmadhafid.zpack.ktx.powerManager
-import io.github.achmadhafid.zpack.ktx.stringRes
+import io.github.achmadhafid.simplepref.SimplePref
+import io.github.achmadhafid.simplepref.simplePref
+import io.github.achmadhafid.zpack.ktx.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-class BlockerService : LifecycleService() {
+class BlockerService : LifecycleService(), SimplePref {
 
     //region Preferences
 
-    private val blockedApps by simplePref { mutableListOf<AppInfo>() }
+    private val blockedApps by simplePref("blocked_apps") { mutableListOf<AppInfo>() }
 
     //endregion
     //region Resource Binding

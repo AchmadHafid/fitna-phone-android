@@ -11,7 +11,7 @@ buildscript {
 }
 
 plugins {
-    with(Plugin.BUILD_SCAN) {id(id) version version}
+//    with(Plugin.BUILD_SCAN) {id(id) version version}
     with(Plugin.DEPENDENCY_CHECKER) {id(id) version version}
     with(Plugin.DETEKT) {id(id) version version}
 }
@@ -31,10 +31,10 @@ detekt {
     parallel    = true
 }
 
-buildScan {
-    termsOfServiceUrl = "https://gradle.com/terms-of-service"
-    termsOfServiceAgree = "yes"
-}
+//buildScan {
+//    termsOfServiceUrl = "https://gradle.com/terms-of-service"
+//    termsOfServiceAgree = "yes"
+//}
 
 tasks.register<Delete>("clean") {
     delete(buildDir)

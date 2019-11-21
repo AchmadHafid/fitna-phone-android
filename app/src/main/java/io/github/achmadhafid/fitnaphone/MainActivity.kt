@@ -15,35 +15,22 @@ import com.getkeepsafe.taptargetview.TapTarget
 import com.getkeepsafe.taptargetview.TapTargetView
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.MaterialToolbar
-import io.github.achmadhafid.lottie_dialog.lottieConfirmationDialog
+import io.github.achmadhafid.lottie_dialog.*
 import io.github.achmadhafid.lottie_dialog.model.LottieDialogType
 import io.github.achmadhafid.lottie_dialog.model.onClick
-import io.github.achmadhafid.lottie_dialog.withAnimation
-import io.github.achmadhafid.lottie_dialog.withCancelOption
-import io.github.achmadhafid.lottie_dialog.withContent
-import io.github.achmadhafid.lottie_dialog.withNegativeButton
-import io.github.achmadhafid.lottie_dialog.withPositiveButton
-import io.github.achmadhafid.lottie_dialog.withTitle
-import io.github.achmadhafid.simplepref.extension.simplePrefNullable
+import io.github.achmadhafid.simplepref.SimplePref
+import io.github.achmadhafid.simplepref.simplePref
 import io.github.achmadhafid.toolbar_badge_menu_item.createToolbarBadge
-import io.github.achmadhafid.zpack.ktx.bindView
-import io.github.achmadhafid.zpack.ktx.hasAppUsagePermission
-import io.github.achmadhafid.zpack.ktx.openUsageAccessSettings
-import io.github.achmadhafid.zpack.ktx.resolveColor
-import io.github.achmadhafid.zpack.ktx.setMaterialToolbar
-import io.github.achmadhafid.zpack.ktx.setSelectedOnScrollDown
-import io.github.achmadhafid.zpack.ktx.startForegroundServiceCompat
-import io.github.achmadhafid.zpack.ktx.stringRes
-import io.github.achmadhafid.zpack.ktx.toastShort
-import io.github.achmadhafid.zpack.ktx.toggleTheme
+import io.github.achmadhafid.toolbar_badge_menu_item.withCount
+import io.github.achmadhafid.zpack.ktx.*
 import jp.wasabeef.recyclerview.animators.SlideInUpAnimator
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class MainActivity : AppCompatActivity(R.layout.activity_main) {
+class MainActivity : AppCompatActivity(R.layout.activity_main), SimplePref {
 
     //region Preferences
 
-    private var theme: Int? by simplePrefNullable()
+    private var theme: Int? by simplePref("app_theme")
 
     //endregion
     //region Resource Binding
@@ -125,10 +112,16 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
         //endregion
         //region create lock icon badge
 
-        createToolbarBadge(
-            menu,
-            mapOf(R.id.action_lock to R.drawable.ic_lock_black_24dp)
-        ) { mainViewModel.blockedApps.size }
+        createToolbarBadge {
+            toolbarMenu = menu
+            icons = mapOf(R.id.action_lock to R.drawable.ic_lock_black_24dp)
+            withCount { itemId ->
+                when (itemId) {
+                    R.id.action_lock -> mainViewModel.blockedApps.size
+                    else -> 0 // no badge
+                }
+            }
+        }
 
         //endregion
         return true

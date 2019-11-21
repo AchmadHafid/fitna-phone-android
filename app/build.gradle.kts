@@ -12,8 +12,8 @@ android {
         minSdkVersion(AndroidSdk.MIN)
         targetSdkVersion(AndroidSdk.TARGET)
         @Suppress("MagicNumber")
-        versionCode = 7
-        versionName = "2.5.0"
+        versionCode = 8
+        versionName = "2.6.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
