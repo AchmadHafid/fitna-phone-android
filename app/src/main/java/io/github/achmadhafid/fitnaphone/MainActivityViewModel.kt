@@ -65,5 +65,5 @@ class MainActivityViewModel(application: Application) : AndroidViewModel(applica
         onDestroySimplePref()
         super.onCleared()
     }
-    
+
 }

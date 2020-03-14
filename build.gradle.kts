@@ -1,4 +1,5 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import io.gitlab.arturbosch.detekt.Detekt
 
 buildscript {
     repositories {
@@ -26,8 +27,8 @@ allprojects {
 detekt {
     toolVersion = Plugin.DETEKT.version
     input       = files("$projectDir")
-    config      = files("$project.rootDir/detekt-config.yml")
-    filters     = ".*test.*,.*/resources/.*,.*/tmp/.*"
+    config      = files("$projectDir/detekt-config.yml")
+    failFast    = false
     parallel    = true
 }
 
@@ -38,6 +39,10 @@ detekt {
 
 tasks.register<Delete>("clean") {
     delete(buildDir)
+}
+
+tasks.withType<Detekt>().all {
+    jvmTarget = "1.8"
 }
 
 subprojects {

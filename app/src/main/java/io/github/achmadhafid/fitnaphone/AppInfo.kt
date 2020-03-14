@@ -25,7 +25,7 @@ data class AppInfo(
 
     companion object {
         private const val SEPARATOR = "<<>>"
-        
+
         fun deserialize(rawString: String): AppInfo = with(rawString.split(SEPARATOR)) {
             (AppInfo(this[0], this[1], this[2].toBoolean()))
         }

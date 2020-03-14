@@ -9,6 +9,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.annotation.MainThread
 import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import io.github.achmadhafid.zpack.ktx.getAppIcon
 import io.github.achmadhafid.zpack.ktx.visibleOrInvisible
@@ -16,17 +17,13 @@ import io.github.achmadhafid.zpack.ktx.visibleOrInvisible
 class AppListAdapter(
     private val context: Context,
     private val onClickListener: (AppInfo) -> Unit
-) : RecyclerView.Adapter<AppListAdapter.ViewHolder>() {
+) : ListAdapter<AppInfo, AppListAdapter.ViewHolder>(DiffUtilCallback) {
 
-    private val iconStore: HashMap<String, Drawable> = HashMap()
-    var items: MutableList<AppInfo> = mutableListOf()
-        set(newItems) {
-            DiffUtil.calculateDiff(DiffUtilCallback(newItems, field))
-                .also { field = newItems.map { it.copy() }.toMutableList() }
-                .dispatchUpdatesTo(this)
-        }
+    private val iconStore: HashMap<String, Drawable?> = HashMap()
 
-    override fun getItemCount() = items.size
+    fun setIcons(icons: List<Pair<String, Drawable?>>) {
+        iconStore.putAll(icons)
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = ViewHolder(
         LayoutInflater.from(parent.context)
@@ -38,7 +35,7 @@ class AppListAdapter(
     )
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        with(items[position]) {
+        with(getItem(position)) {
             holder.bindAppInfo(
                 this,
                 getIconDrawable(packageName),
@@ -91,21 +88,13 @@ class AppListAdapter(
 
 //region Diff Util Helper
 
-class DiffUtilCallback(
-    private val newItems: List<AppInfo>,
-    private val oldItems: List<AppInfo>
-) : DiffUtil.Callback() {
+object DiffUtilCallback : DiffUtil.ItemCallback<AppInfo>() {
 
-    override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int) =
-        newItems[newItemPosition].packageName == oldItems[oldItemPosition].packageName
+    override fun areItemsTheSame(oldItem: AppInfo, newItem: AppInfo) =
+        newItem.packageName == oldItem.packageName
 
-    override fun getOldListSize() = oldItems.size
-
-    override fun getNewListSize() = newItems.size
-
-    override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int) =
-        newItems[newItemPosition].name == oldItems[oldItemPosition].name &&
-                newItems[newItemPosition].blocked == oldItems[oldItemPosition].blocked
+    override fun areContentsTheSame(oldItem: AppInfo, newItem: AppInfo) =
+        newItem.packageName == oldItem.packageName && newItem.blocked == oldItem.blocked
 
 }
 

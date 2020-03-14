@@ -11,7 +11,9 @@ import io.github.achmadhafid.zpack.ktx.applyTheme
 import jonathanfinerty.once.Once
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
+import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.core.context.startKoin
+import org.koin.dsl.module
 
 class App : Application(), SimplePrefLifecycleOwner by SimplePrefApplication() {
 
@@ -27,7 +29,7 @@ class App : Application(), SimplePrefLifecycleOwner by SimplePrefApplication() {
         super.onCreate()
 
         attachSimplePrefContext(this)
-        // Add converter for data type `MutableList<String>`
+        //region Add converter for data type `MutableList<String>`
         simplePrefAddConverter<MutableList<AppInfo>> {
             onSerialize {
                 it.joinToString("::") { appInfo ->
@@ -41,10 +43,11 @@ class App : Application(), SimplePrefLifecycleOwner by SimplePrefApplication() {
                 }.toMutableList()
             }
         }
+        //endregion
         startKoin {
             androidLogger()
             androidContext(this@App)
-            modules(appModule)
+            modules(module { viewModel { MainActivityViewModel(get()) } })
         }
         Once.initialise(this)
         theme?.let { applyTheme(it) }

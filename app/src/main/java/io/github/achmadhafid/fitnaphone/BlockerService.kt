@@ -16,7 +16,15 @@ import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.lifecycleScope
 import io.github.achmadhafid.simplepref.SimplePref
 import io.github.achmadhafid.simplepref.simplePref
-import io.github.achmadhafid.zpack.ktx.*
+import io.github.achmadhafid.zpack.ktx.atLeastOreo
+import io.github.achmadhafid.zpack.ktx.dimenRes
+import io.github.achmadhafid.zpack.ktx.foregroundApp
+import io.github.achmadhafid.zpack.ktx.intRes
+import io.github.achmadhafid.zpack.ktx.longRes
+import io.github.achmadhafid.zpack.ktx.notificationManager
+import io.github.achmadhafid.zpack.ktx.openHomeLauncher
+import io.github.achmadhafid.zpack.ktx.powerManager
+import io.github.achmadhafid.zpack.ktx.stringRes
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -55,7 +63,7 @@ class BlockerService : LifecycleService(), SimplePref {
                 NotificationManager.IMPORTANCE_HIGH
             ).let {
                 notificationManager.createNotificationChannel(it.apply {
-                    importance  = NotificationManager.IMPORTANCE_HIGH
+                    importance = NotificationManager.IMPORTANCE_HIGH
                     description = notificationChannelDescription
                 })
             }
@@ -71,8 +79,8 @@ class BlockerService : LifecycleService(), SimplePref {
         if (!isForeground) {
             //region Make this service foreground
 
-            val contentTitle     = "${blockedApps.size} ${when (blockedApps.size) {
-                1    -> notificationTitle
+            val contentTitle = "${blockedApps.size} ${when (blockedApps.size) {
+                1 -> notificationTitle
                 else -> notificationTitleMulti
             }}"
             val contentTextShort = SpannableString(notificationText).apply {
@@ -82,8 +90,8 @@ class BlockerService : LifecycleService(), SimplePref {
                     Spannable.SPAN_INCLUSIVE_EXCLUSIVE
                 )
             }
-            val contentTextLong  = blockedApps
-                .map {appInfo ->
+            val contentTextLong = blockedApps
+                .map { appInfo ->
                     SpannableStringBuilder(appInfo.name).apply {
                         setSpan(
                             BulletSpan(dpSmall),
@@ -113,7 +121,7 @@ class BlockerService : LifecycleService(), SimplePref {
                 while (true) {
                     delay(scanInterval)
                     if (powerManager.isInteractive) {
-                        foregroundApp?.let {packageName ->
+                        foregroundApp?.let { packageName ->
                             if (blockedApps.contains(packageName)) {
                                 openHomeLauncher()
                             }

@@ -6,29 +6,46 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.animation.OvershootInterpolator
-import android.widget.ProgressBar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.getkeepsafe.taptargetview.TapTarget
 import com.getkeepsafe.taptargetview.TapTargetView
-import com.google.android.material.appbar.AppBarLayout
-import com.google.android.material.appbar.MaterialToolbar
-import io.github.achmadhafid.lottie_dialog.*
+import io.github.achmadhafid.fitnaphone.databinding.ActivityMainBinding
+import io.github.achmadhafid.lottie_dialog.lottieConfirmationDialog
 import io.github.achmadhafid.lottie_dialog.model.LottieDialogType
 import io.github.achmadhafid.lottie_dialog.model.onClick
+import io.github.achmadhafid.lottie_dialog.withAnimation
+import io.github.achmadhafid.lottie_dialog.withCancelOption
+import io.github.achmadhafid.lottie_dialog.withContent
+import io.github.achmadhafid.lottie_dialog.withNegativeButton
+import io.github.achmadhafid.lottie_dialog.withPositiveButton
+import io.github.achmadhafid.lottie_dialog.withTitle
 import io.github.achmadhafid.simplepref.SimplePref
 import io.github.achmadhafid.simplepref.simplePref
 import io.github.achmadhafid.toolbar_badge_menu_item.createToolbarBadge
 import io.github.achmadhafid.toolbar_badge_menu_item.withCount
-import io.github.achmadhafid.zpack.ktx.*
+import io.github.achmadhafid.zpack.ktx.getAppIcon
+import io.github.achmadhafid.zpack.ktx.hasAppUsagePermission
+import io.github.achmadhafid.zpack.ktx.openUsageAccessSettings
+import io.github.achmadhafid.zpack.ktx.resolveColor
+import io.github.achmadhafid.zpack.ktx.setMaterialToolbar
+import io.github.achmadhafid.zpack.ktx.setSelectedOnScrollDown
+import io.github.achmadhafid.zpack.ktx.startForegroundServiceCompat
+import io.github.achmadhafid.zpack.ktx.stringRes
+import io.github.achmadhafid.zpack.ktx.toastShort
+import io.github.achmadhafid.zpack.ktx.toggleTheme
+import jonathanfinerty.once.Once
 import jp.wasabeef.recyclerview.animators.SlideInUpAnimator
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class MainActivity : AppCompatActivity(R.layout.activity_main), SimplePref {
+class MainActivity : AppCompatActivity(), SimplePref {
 
-    //region Preferences
+    //region Preference
 
     private var theme: Int? by simplePref("app_theme")
 
@@ -40,10 +57,9 @@ class MainActivity : AppCompatActivity(R.layout.activity_main), SimplePref {
     //endregion
     //region View Binding
 
-    private val appBarLayout: AppBarLayout by bindView(R.id.appBarLayout)
-    private val toolbar: MaterialToolbar by bindView(R.id.toolbar)
-    private val progressBar: ProgressBar by bindView(R.id.progressBar)
-    private val recyclerView: RecyclerView by bindView(R.id.recyclerView)
+    private val binding: ActivityMainBinding by lazy {
+        ActivityMainBinding.inflate(layoutInflater)
+    }
 
     //endregion
     //region View Model
@@ -63,6 +79,7 @@ class MainActivity : AppCompatActivity(R.layout.activity_main), SimplePref {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setContentView(binding.root)
         setMaterialToolbar(R.id.toolbar)
 
         if (BlockerService.isForeground) {
@@ -72,27 +89,37 @@ class MainActivity : AppCompatActivity(R.layout.activity_main), SimplePref {
             //region setup recycler view
 
             @Suppress("MagicNumber")
-            recyclerView.apply {
+            binding.recyclerView.apply {
                 setHasFixedSize(true)
-                adapter       = appListAdapter
+                adapter = appListAdapter
                 layoutManager = LinearLayoutManager(context)
-                itemAnimator  = SlideInUpAnimator(OvershootInterpolator(1.0f)).apply {
-                    addDuration    = 250L
+                itemAnimator = SlideInUpAnimator(OvershootInterpolator(1.0f)).apply {
+                    addDuration = 250L
                     changeDuration = 100L
                 }
-                appBarLayout.setSelectedOnScrollDown(recyclerView)
+                binding.appBarLayout.setSelectedOnScrollDown(binding.recyclerView)
             }
 
             //endregion
             //region setup view model
 
-            mainViewModel.appList
-                .observe(this, Observer {
-                    appListAdapter.items   = it.toMutableList()
-                    progressBar.visibility = View.GONE
+            mainViewModel.appList.observe(this, Observer { apps ->
+                lifecycleScope.launch {
+                    val icons = withContext(Dispatchers.IO) {
+                        apps.map {
+                            it.packageName to getAppIcon(it.packageName)
+                        }
+                    }
+                    appListAdapter.setIcons(icons)
+                    appListAdapter.submitList(apps.map { item -> item.copy() })
+                    binding.progressBar.visibility = View.GONE
                     invalidateOptionsMenu()
-                    doOnce(tutorialTag) { showFirstTimeTutorial() }
-                })
+                    if (!Once.beenDone(tutorialTag)) {
+                        Once.markDone(tutorialTag)
+                        ({ showFirstTimeTutorial() })()
+                    }
+                }
+            })
 
             //endregion
         }
@@ -154,11 +181,11 @@ class MainActivity : AppCompatActivity(R.layout.activity_main), SimplePref {
             TapTargetView.showFor(
                 this,
                 TapTarget.forToolbarMenuItem(
-                    toolbar,
-                    R.id.action_lock,
-                    getString(R.string.tutorial_lock_title),
-                    getString(R.string.tutorial_lock_description)
-                ).outerCircleColor(R.color.color_selection_overlay)
+                        binding.toolbar,
+                        R.id.action_lock,
+                        getString(R.string.tutorial_lock_title),
+                        getString(R.string.tutorial_lock_description)
+                    ).outerCircleColor(R.color.color_selection_overlay)
                     .outerCircleAlpha(1f)
                     .titleTextColorInt(resolveColor(R.attr.colorOnSurface))
                     .descriptionTextColorInt(resolveColor(R.attr.colorOnSurface))
@@ -181,11 +208,11 @@ class MainActivity : AppCompatActivity(R.layout.activity_main), SimplePref {
         TapTargetView.showFor(
             this,
             TapTarget.forToolbarMenuItem(
-                toolbar,
-                R.id.action_switch_theme,
-                getString(R.string.tutorial_switch_theme_title),
-                getString(R.string.tutorial_switch_theme_description)
-            ).outerCircleColor(R.color.color_selection_overlay)
+                    binding.toolbar,
+                    R.id.action_switch_theme,
+                    getString(R.string.tutorial_switch_theme_title),
+                    getString(R.string.tutorial_switch_theme_description)
+                ).outerCircleColor(R.color.color_selection_overlay)
                 .outerCircleAlpha(1f)
                 .titleTextColorInt(resolveColor(R.attr.colorOnSurface))
                 .descriptionTextColorInt(resolveColor(R.attr.colorOnSurface))
@@ -204,8 +231,8 @@ class MainActivity : AppCompatActivity(R.layout.activity_main), SimplePref {
             withTitle(R.string.dialog_permission_required_title)
             withContent(R.string.dialog_permission_required_message)
             withPositiveButton {
-                textRes     = android.R.string.ok
-                iconRes     = R.drawable.ic_check_black_18dp
+                textRes = android.R.string.ok
+                iconRes = R.drawable.ic_check_black_18dp
                 actionDelay = resources.getInteger(R.integer.dialog_action_delay).toLong()
                 onClick { openUsageAccessSettings() }
             }
