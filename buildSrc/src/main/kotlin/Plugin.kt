@@ -2,9 +2,9 @@
 
 private const val VERSIONS_BUILD_SCAN         = "3.0"
 private const val VERSIONS_DEPENDENCY_CHECKER = "0.28.0"
-private const val VERSIONS_DETEKT             = "1.7.0-beta1"
-private const val VERSIONS_AGP                = "3.6.1"
-private const val VERSIONS_KOTLIN             = "1.3.70"
+private const val VERSIONS_DETEKT             = "1.10.0"
+private const val VERSIONS_AGP                = "4.0.0"
+private const val VERSIONS_KOTLIN             = "1.3.72"
 
 //endregion
 

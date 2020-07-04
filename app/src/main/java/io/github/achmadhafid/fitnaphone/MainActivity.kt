@@ -13,29 +13,27 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.getkeepsafe.taptargetview.TapTarget
 import com.getkeepsafe.taptargetview.TapTargetView
 import io.github.achmadhafid.fitnaphone.databinding.ActivityMainBinding
-import io.github.achmadhafid.lottie_dialog.lottieConfirmationDialog
+import io.github.achmadhafid.lottie_dialog.core.lottieConfirmationDialog
+import io.github.achmadhafid.lottie_dialog.core.withAnimation
+import io.github.achmadhafid.lottie_dialog.core.withCancelOption
+import io.github.achmadhafid.lottie_dialog.core.withContent
+import io.github.achmadhafid.lottie_dialog.core.withNegativeButton
+import io.github.achmadhafid.lottie_dialog.core.withPositiveButton
+import io.github.achmadhafid.lottie_dialog.core.withTitle
 import io.github.achmadhafid.lottie_dialog.model.LottieDialogType
 import io.github.achmadhafid.lottie_dialog.model.onClick
-import io.github.achmadhafid.lottie_dialog.withAnimation
-import io.github.achmadhafid.lottie_dialog.withCancelOption
-import io.github.achmadhafid.lottie_dialog.withContent
-import io.github.achmadhafid.lottie_dialog.withNegativeButton
-import io.github.achmadhafid.lottie_dialog.withPositiveButton
-import io.github.achmadhafid.lottie_dialog.withTitle
 import io.github.achmadhafid.simplepref.SimplePref
 import io.github.achmadhafid.simplepref.simplePref
+import io.github.achmadhafid.toolbar_badge_menu_item.addItem
 import io.github.achmadhafid.toolbar_badge_menu_item.createToolbarBadge
-import io.github.achmadhafid.toolbar_badge_menu_item.withCount
-import io.github.achmadhafid.zpack.ktx.getAppIcon
-import io.github.achmadhafid.zpack.ktx.hasAppUsagePermission
-import io.github.achmadhafid.zpack.ktx.openUsageAccessSettings
-import io.github.achmadhafid.zpack.ktx.resolveColor
-import io.github.achmadhafid.zpack.ktx.setMaterialToolbar
-import io.github.achmadhafid.zpack.ktx.setSelectedOnScrollDown
-import io.github.achmadhafid.zpack.ktx.startForegroundServiceCompat
-import io.github.achmadhafid.zpack.ktx.stringRes
-import io.github.achmadhafid.zpack.ktx.toastShort
-import io.github.achmadhafid.zpack.ktx.toggleTheme
+import io.github.achmadhafid.zpack.extension.getAppIcon
+import io.github.achmadhafid.zpack.extension.hasAppUsagePermission
+import io.github.achmadhafid.zpack.extension.openUsageAccessSettings
+import io.github.achmadhafid.zpack.extension.resolveColor
+import io.github.achmadhafid.zpack.extension.startForegroundServiceCompat
+import io.github.achmadhafid.zpack.extension.stringRes
+import io.github.achmadhafid.zpack.extension.toastShort
+import io.github.achmadhafid.zpack.extension.toggleTheme
 import jonathanfinerty.once.Once
 import jp.wasabeef.recyclerview.animators.SlideInUpAnimator
 import kotlinx.coroutines.Dispatchers
@@ -74,55 +72,60 @@ class MainActivity : AppCompatActivity(), SimplePref {
     }
 
     //endregion
-
     //region Lifecycle Callback
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(binding.root)
-        setMaterialToolbar(R.id.toolbar)
+        //region check for already running blocker service
 
         if (BlockerService.isForeground) {
             toastShort(R.string.message_service_already_running)
             finish()
-        } else {
-            //region setup recycler view
-
-            @Suppress("MagicNumber")
-            binding.recyclerView.apply {
-                setHasFixedSize(true)
-                adapter = appListAdapter
-                layoutManager = LinearLayoutManager(context)
-                itemAnimator = SlideInUpAnimator(OvershootInterpolator(1.0f)).apply {
-                    addDuration = 250L
-                    changeDuration = 100L
-                }
-                binding.appBarLayout.setSelectedOnScrollDown(binding.recyclerView)
-            }
-
-            //endregion
-            //region setup view model
-
-            mainViewModel.appList.observe(this, Observer { apps ->
-                lifecycleScope.launch {
-                    val icons = withContext(Dispatchers.IO) {
-                        apps.map {
-                            it.packageName to getAppIcon(it.packageName)
-                        }
-                    }
-                    appListAdapter.setIcons(icons)
-                    appListAdapter.submitList(apps.map { item -> item.copy() })
-                    binding.progressBar.visibility = View.GONE
-                    invalidateOptionsMenu()
-                    if (!Once.beenDone(tutorialTag)) {
-                        Once.markDone(tutorialTag)
-                        ({ showFirstTimeTutorial() })()
-                    }
-                }
-            })
-
-            //endregion
+            return
         }
+
+        //endregion
+        //region setup content
+
+        setContentView(binding.root)
+        setSupportActionBar(binding.toolbar)
+
+        //endregion
+        //region setup recycler view
+
+        @Suppress("MagicNumber")
+        binding.recyclerView.apply {
+            setHasFixedSize(true)
+            adapter = appListAdapter
+            layoutManager = LinearLayoutManager(context)
+            itemAnimator = SlideInUpAnimator(OvershootInterpolator(1.0f)).apply {
+                addDuration = 250L
+                changeDuration = 100L
+            }
+        }
+
+        //endregion
+        //region setup view model
+
+        mainViewModel.appList.observe(this, Observer { apps ->
+            lifecycleScope.launch {
+                val icons = withContext(Dispatchers.IO) {
+                    apps.map {
+                        it.packageName to getAppIcon(it.packageName)
+                    }
+                }
+                appListAdapter.setIcons(icons)
+                appListAdapter.submitList(apps.map { item -> item.copy() })
+                binding.progressBar.visibility = View.GONE
+                invalidateOptionsMenu()
+                if (!Once.beenDone(tutorialTag)) {
+                    Once.markDone(tutorialTag)
+                    ({ showFirstTimeTutorial() })()
+                }
+            }
+        })
+
+        //endregion
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -139,15 +142,12 @@ class MainActivity : AppCompatActivity(), SimplePref {
         //endregion
         //region create lock icon badge
 
-        createToolbarBadge {
-            toolbarMenu = menu
-            icons = mapOf(R.id.action_lock to R.drawable.ic_lock_black_24dp)
-            withCount { itemId ->
-                when (itemId) {
-                    R.id.action_lock -> mainViewModel.blockedApps.size
-                    else -> 0 // no badge
-                }
-            }
+        createToolbarBadge(menu) {
+            addItem(
+                id    = R.id.action_lock,
+                icon  = R.drawable.ic_lock_black_24dp,
+                count =  mainViewModel.blockedApps.size
+            )
         }
 
         //endregion
@@ -161,7 +161,13 @@ class MainActivity : AppCompatActivity(), SimplePref {
                 if (it.isEmpty()) {
                     return false
                 } else if (!hasAppUsagePermission) {
-                    showPermissionRequestDialog()
+                    showPermissionRequestDialog {
+                        openUsageAccessSettings()
+                    }
+                } else if (!canRunActivityFromService) {
+                    showPermissionRequestDialog {
+                        startActivity(systemAlertWindowSettingScreen!!)
+                    }
                 } else {
                     startForegroundServiceCompat<BlockerService>()
                     finish()
@@ -224,21 +230,21 @@ class MainActivity : AppCompatActivity(), SimplePref {
         )
     }
 
-    private fun showPermissionRequestDialog() {
-        lottieConfirmationDialog {
+    private fun showPermissionRequestDialog(onclickListener: () -> Unit) {
+        lottieConfirmationDialog(0) {
             type = LottieDialogType.BOTTOM_SHEET
             withAnimation(R.raw.dialog_illustration)
             withTitle(R.string.dialog_permission_required_title)
             withContent(R.string.dialog_permission_required_message)
             withPositiveButton {
                 textRes = android.R.string.ok
-                iconRes = R.drawable.ic_check_black_18dp
+                iconRes = R.drawable.ic_done_24dp
                 actionDelay = resources.getInteger(R.integer.dialog_action_delay).toLong()
-                onClick { openUsageAccessSettings() }
+                onClick { onclickListener() }
             }
             withNegativeButton {
                 textRes = android.R.string.cancel
-                iconRes = R.drawable.ic_close_black_18dp
+                iconRes = R.drawable.ic_close_24dp
             }
             withCancelOption { onTouchOutside = false }
         }

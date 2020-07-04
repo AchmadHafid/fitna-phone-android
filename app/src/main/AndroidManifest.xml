@@ -2,6 +2,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="io.github.achmadhafid.fitnaphone">
 
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission
         android:name="android.permission.PACKAGE_USAGE_STATS"
@@ -28,7 +29,8 @@
         <service
             android:name=".BlockerService"
             android:enabled="true"
-            android:exported="false" />
+            android:exported="false"
+            android:foregroundServiceType="dataSync" />
 
     </application>
 

@@ -4,9 +4,10 @@
 
     <item
         android:id="@+id/action_clear_selection"
+        android:icon="@drawable/ic_close_24dp"
         android:orderInCategory="100"
         android:title="@string/menu_clear_selection"
-        android:icon="@drawable/ic_clear_black_24dp"
+        app:iconTint="?attr/colorPrimary"
         app:showAsAction="ifRoom" />
     <item
         android:id="@+id/action_lock"
@@ -16,9 +17,9 @@
         app:showAsAction="ifRoom" />
     <item
         android:id="@+id/action_switch_theme"
+        android:icon="@drawable/ic_switch_theme_24dp"
         android:orderInCategory="300"
         android:title="@string/menu_switch_theme"
-        android:icon="@drawable/ic_switch_theme_24dp"
-        app:showAsAction="ifRoom"/>
+        app:showAsAction="ifRoom" />
 
 </menu>

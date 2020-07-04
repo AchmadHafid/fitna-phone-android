@@ -3,8 +3,8 @@ package io.github.achmadhafid.fitnaphone
 import android.annotation.TargetApi
 import android.content.Context
 import android.os.Build
-import io.github.achmadhafid.zpack.ktx.atLeastNougat
-import io.github.achmadhafid.zpack.ktx.getAppName
+import io.github.achmadhafid.zpack.extension.atLeastNougat
+import io.github.achmadhafid.zpack.extension.getAppName
 
 data class AppInfo(
     val packageName: String,
@@ -32,7 +32,7 @@ data class AppInfo(
     }
 }
 
-fun List<AppInfo>.contains(packageName: String) =
+infix fun List<AppInfo>.contains(packageName: String) =
     find { it.packageName == packageName } != null
 
 fun List<AppInfo>.updateBlocked(appInfo: AppInfo) {

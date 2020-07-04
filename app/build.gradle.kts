@@ -12,8 +12,8 @@ android {
         minSdkVersion(AndroidSdk.MIN)
         targetSdkVersion(AndroidSdk.TARGET)
         @Suppress("MagicNumber")
-        versionCode = 9
-        versionName = "2.7.0"
+        versionCode = 11
+        versionName = "3.0.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -54,8 +54,8 @@ android {
             java.srcDir("src/uiTest/java")
         }
     }
-    viewBinding {
-        isEnabled = true
+    buildFeatures {
+        viewBinding = true
     }
 }
 

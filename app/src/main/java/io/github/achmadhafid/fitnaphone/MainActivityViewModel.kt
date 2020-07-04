@@ -9,8 +9,7 @@ import io.github.achmadhafid.simplepref.core.simplePrefSave
 import io.github.achmadhafid.simplepref.lifecycle.SimplePrefLifecycleOwner
 import io.github.achmadhafid.simplepref.lifecycle.SimplePrefViewModel
 import io.github.achmadhafid.simplepref.simplePref
-import io.github.achmadhafid.zpack.ktx.installedLauncherApp
-import io.github.achmadhafid.zpack.ktx.notifyObserver
+import io.github.achmadhafid.zpack.extension.installedLauncherApp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -27,7 +26,7 @@ class MainActivityViewModel(application: Application) : AndroidViewModel(applica
                 runCatching {
                     val lisOfApps = ctx.installedLauncherApp
                         .filter { it.packageName != context?.packageName }
-                        .map { AppInfo(ctx, it.packageName, blockedApps.contains(it.packageName)) }
+                        .map { AppInfo(ctx, it.packageName, blockedApps contains it.packageName) }
                         .sortedBy { it.name }
                     _appList.postValue(lisOfApps)
                 }.onFailure {
@@ -44,7 +43,7 @@ class MainActivityViewModel(application: Application) : AndroidViewModel(applica
         with(_appList) {
             value?.let {
                 it.updateBlocked(appInfo)
-                notifyObserver()
+                value = value
             }
         }
     }
@@ -56,7 +55,7 @@ class MainActivityViewModel(application: Application) : AndroidViewModel(applica
         with(_appList) {
             value?.let {
                 it.resetBlocked()
-                notifyObserver()
+                value = value
             }
         }
     }

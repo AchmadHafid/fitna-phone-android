@@ -12,19 +12,19 @@ import android.text.SpannableStringBuilder
 import android.text.style.BulletSpan
 import android.text.style.StyleSpan
 import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.lifecycleScope
 import io.github.achmadhafid.simplepref.SimplePref
 import io.github.achmadhafid.simplepref.simplePref
-import io.github.achmadhafid.zpack.ktx.atLeastOreo
-import io.github.achmadhafid.zpack.ktx.dimenRes
-import io.github.achmadhafid.zpack.ktx.foregroundApp
-import io.github.achmadhafid.zpack.ktx.intRes
-import io.github.achmadhafid.zpack.ktx.longRes
-import io.github.achmadhafid.zpack.ktx.notificationManager
-import io.github.achmadhafid.zpack.ktx.openHomeLauncher
-import io.github.achmadhafid.zpack.ktx.powerManager
-import io.github.achmadhafid.zpack.ktx.stringRes
+import io.github.achmadhafid.zpack.extension.atLeastOreo
+import io.github.achmadhafid.zpack.extension.dimenRes
+import io.github.achmadhafid.zpack.extension.foregroundApp
+import io.github.achmadhafid.zpack.extension.intRes
+import io.github.achmadhafid.zpack.extension.notificationManagerCompat
+import io.github.achmadhafid.zpack.extension.openHomeLauncher
+import io.github.achmadhafid.zpack.extension.powerManager
+import io.github.achmadhafid.zpack.extension.stringRes
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -37,7 +37,7 @@ class BlockerService : LifecycleService(), SimplePref {
     //endregion
     //region Resource Binding
 
-    private val scanInterval by longRes(R.integer.scan_interval)
+    private val scanInterval by intRes(R.integer.scan_interval)
     private val notificationId by intRes(R.integer.notification_id)
     private val notificationTitle by stringRes(R.string.blocker_notification_title)
     private val notificationTitleMulti by stringRes(R.string.blocker_notification_title_multi)
@@ -48,7 +48,6 @@ class BlockerService : LifecycleService(), SimplePref {
     private val dpSmall by dimenRes(R.dimen.small)
 
     //endregion
-
     //region Lifecycle Callback
 
     override fun onCreate() {
@@ -62,8 +61,8 @@ class BlockerService : LifecycleService(), SimplePref {
                 notificationChannelName,
                 NotificationManager.IMPORTANCE_HIGH
             ).let {
-                notificationManager.createNotificationChannel(it.apply {
-                    importance = NotificationManager.IMPORTANCE_HIGH
+                notificationManagerCompat.createNotificationChannel(it.apply {
+                    importance = NotificationManagerCompat.IMPORTANCE_HIGH
                     description = notificationChannelDescription
                 })
             }
@@ -119,12 +118,17 @@ class BlockerService : LifecycleService(), SimplePref {
 
             lifecycleScope.launch {
                 while (true) {
-                    delay(scanInterval)
+                    delay(scanInterval.toLong())
+
+                    if (!canRunActivityFromService) {
+                        stopSelf()
+                        return@launch
+                    }
+
                     if (powerManager.isInteractive) {
                         foregroundApp?.let { packageName ->
-                            if (blockedApps.contains(packageName)) {
+                            if (blockedApps contains packageName)
                                 openHomeLauncher()
-                            }
                         } ?: stopSelf()
                     }
                 }
