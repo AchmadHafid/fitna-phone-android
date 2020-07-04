@@ -56,5 +56,3 @@ class App : Application(), SimplePrefLifecycleOwner by SimplePrefApplication() {
     //endregion
 
 }
-
-// TODO 04/07/2020 add dialog before send user to draw overlay settings screen
